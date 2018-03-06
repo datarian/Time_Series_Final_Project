@@ -1,1 +1,71 @@
-\usepackage{fancyheader}
+%% Reduced margins
+%\usepackage[
+%    a4paper,
+%    top=3.8cm,
+%    hmargin=3cm,%
+%    bottom=3cm%%
+%]{geometry}
+\geometry{a4paper,top=3.8cm,hmargin=3cm,bottom=3cm}
+%%\usepackage{subcaption}
+\usepackage{caption}
+\usepackage{subfig}
+
+%% Typography defaults
+\usepackage{fontspec}
+\setsansfont{Arial}
+\setmainfont{Roboto}
+\setmonofont{Source Code Pro}
+\usepackage[italic]{mathastext}
+\usepackage{isomath}
+\usepackage{gensymb}
+
+%% Custom font sizes for each heading level
+\usepackage{sectsty}
+\sectionfont{\sffamily\fontsize{16}{18}\selectfont\uppercase}
+\subsectionfont{\sffamily\fontsize{12}{14}\selectfont\uppercase}
+\subsubsectionfont{\sffamily\fontsize{11}{12}\selectfont\uppercase}
+
+\usepackage[bottom]{footmisc}
+
+
+%% Paragraph and line spacing
+%%\linespread{1.05} % a bit more vertical space
+\setlength{\parskip}{\baselineskip} % space between paragraphs spacing is one baseline unit
+\renewcommand{\arraystretch}{1.5}
+
+%% Sections headings spacing: one baseline unit before, none after
+\usepackage{titlesec}
+\titlespacing{\section}{0pt}{\baselineskip}{0pt}
+\titlespacing{\subsection}{0pt}{\baselineskip}{0pt}
+\titlespacing{\subsubsection}{0pt}{\baselineskip}{0pt}
+
+\usepackage[section]{placeins}
+
+\makeatletter
+\AtBeginDocument{%
+  \expandafter\renewcommand\expandafter\subsection\expandafter{%
+    \expandafter\@fb@secFB\subsection%
+  }%
+}
+\makeatother
+
+\makeatletter
+\AtBeginDocument{%
+  \expandafter\renewcommand\expandafter\subsubsection\expandafter{%
+    \expandafter\@fb@secFB\subsubsection%
+  }%
+}
+\makeatother
+
+\usepackage{graphicx}
+
+\usepackage{float}
+
+
+\renewcommand{\thesubfigure}{\alph{subfigure}}
+
+\let\oldsubfloat\subfloat
+\renewcommand{\subfloat}[2][sub-caption]{\oldsubfloat{#1}{#2} \hfill \\}
+
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
