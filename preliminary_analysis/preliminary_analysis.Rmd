@@ -46,14 +46,22 @@ plot(spruce_sub900_ts,
      ylab="tree ring width [1/100 mm]",
      xlab="year")
 
-model <- lm(spruce_sub900_ts~t+t_sq+t_cu)
+model <- lm(spruce_sub900_ts~t)
 summary(model) # cubic trend is still significant
 
 resid_spruce_sub900 <- residuals(model)
 resid_spruce_sub900_ts <- ts(resid_spruce_sub900,end=2017)
-mean(resid_spruce_sub900_ts)
+mean(resid_spruce_sub900_ts) # ~ zero mean
+qqnorm(resid_spruce_sub900_ts) # close to a normal distribution
+hist(resid_spruce_sub900_ts) # slightly right-skewed
+
 plotc(resid_spruce_sub900_ts)
 
+acf(resid_spruce_sub900_ts,lag.max = 200)
+# Sample ACF shows no indication of iid-ness
+
+Box.test(resid_spruce_sub900_ts,lag=200,type="Ljung-Box")
+# Reject H0: The residuals are not iid
 ```
 
 # Questions to be answered
