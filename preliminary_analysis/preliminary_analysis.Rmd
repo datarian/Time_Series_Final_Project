@@ -46,7 +46,7 @@ plot(spruce_sub900_ts,
      ylab="tree ring width [1/100 mm]",
      xlab="year")
 
-model <- lm(spruce_sub900_ts~t)
+model <- lm(spruce_sub900_ts~t+t_sq+t_cu)
 summary(model) # cubic trend is still significant
 
 resid_spruce_sub900 <- residuals(model)
@@ -57,11 +57,30 @@ hist(resid_spruce_sub900_ts) # slightly right-skewed
 
 plotc(resid_spruce_sub900_ts)
 
-acf(resid_spruce_sub900_ts,lag.max = 200)
-# Sample ACF shows no indication of iid-ness
-
 Box.test(resid_spruce_sub900_ts,lag=200,type="Ljung-Box")
 # Reject H0: The residuals are not iid
+# Which was to be expected, given the nature of the data
+
+# Sample ACF shows non-stationarity.
+acf(resid_spruce_sub900_ts,lag.max = 250)
+
+# try to paramtrize an AR(1) model
+r1d1 <- resid_spruce_sub900[1:(length(resid_spruce_sub900)-1)]
+ar1d2 <- resid_spruce_sub900[-1]
+plot(ar1d2~ar1d1)
+ar1_model <- lm(ar1d2~ar1d1)
+summary(ar1_model) # 
+acf(ar_model$residuals,lag.max = 200) # already looks a lot better, but to many gamma(h) outside of range
+
+# AR(2)?
+ar2d1 <- resid_spruce_sub900[1:(length(resid_spruce_sub900)-2)]
+ar2d2 <- resid_spruce_sub900[2:(length(resid_spruce_sub900)-1)]
+ar2d3 <- resid_spruce_sub900[3:length(resid_spruce_sub900)]
+ar2_model <- lm(ar2d3~ar2d1+ar2d2)
+summary(ar2_model)
+acf(ar2_model$residuals) # still not...
+
+
 ```
 
 # Questions to be answered
