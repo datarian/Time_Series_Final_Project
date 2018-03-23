@@ -4,4 +4,7 @@
 .Ruserdata
 *.pdf
 tex2pdf*
-data/*
+data/*picea*
+data/*abies*
+data/dendrochrono_raw.txt
+data/dendrochronologies.Rdata
