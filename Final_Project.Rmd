@@ -1,7 +1,7 @@
 ---
 title: "Final Project"
 author: "Time Series Analysis"
-date: "06 March 2018"
+date: '`r Sys.Date()`'
 bibliography: final_project.bib
 output:
     pdf_document:
@@ -10,7 +10,8 @@ output:
         fig_height: 6
         fig_width: 7
         includes:
-            in_header: mystyles.sty
+            in_header: latex/mystyles.sty
+            before_body: latex/before_body.tex
         keep_tex: yes
         latex_engine: xelatex
         number_sections: yes

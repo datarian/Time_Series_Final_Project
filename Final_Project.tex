@@ -25,7 +25,7 @@
 \usepackage{hyperref}
 \hypersetup{unicode=true,
             pdftitle={Final Project},
-            pdfauthor={Florian Hochstrasser},
+            pdfauthor={Time Series Analysis},
             pdfborder={0 0 0},
             breaklinks=true}
 \urlstyle{same}  % don't use monospace font for urls
@@ -76,22 +76,14 @@
   \title{Final Project}
   \pretitle{\vspace{\droptitle}\centering\huge}
   \posttitle{\par}
-  \author{Florian Hochstrasser}
+  \author{Time Series Analysis}
   \preauthor{\centering\large\emph}
   \postauthor{\par}
   \predate{\centering\large\emph}
   \postdate{\par}
   \date{06 March 2018}
 
-%% Reduced margins
-%\usepackage[
-%    a4paper,
-%    top=3.8cm,
-%    hmargin=3cm,%
-%    bottom=3cm%%
-%]{geometry}
 \geometry{a4paper,top=3.8cm,hmargin=3cm,bottom=3cm}
-%%\usepackage{subcaption}
 \usepackage{caption}
 \usepackage{subfig}
 
@@ -155,10 +147,21 @@
 \providecommand{\tightlist}{%
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
 
+% Bibliography
+\usepackage[backend=bibtex]{biblatex}
+
 \begin{document}
 \maketitle
 
-\subsection{R Markdown}\label{r-markdown}
+\newpage
+
+{
+\setcounter{tocdepth}{2}
+\tableofcontents
+}
+\section{Introduction}\label{introduction}
+
+This project relies heavily on R Core Team (2017).
 
 This is an R Markdown document. Markdown is a simple formatting syntax
 for authoring HTML, PDF, and MS Word documents. For more details on
@@ -178,7 +181,7 @@ chunks within the document. You can embed an R code chunk like this:
 ##  Max.   :25.0   Max.   :120.00
 \end{verbatim}
 
-\subsection{Including Plots}\label{including-plots}
+\section{Methods}\label{methods}
 
 You can also embed plots, for example:
 
@@ -193,6 +196,19 @@ You can also embed plots, for example:
 
 Note that the \texttt{echo\ =\ FALSE} parameter was added to the code
 chunk to prevent printing of the R code that generated the plot.
+
+\section{Results \& Discussion}\label{results-discussion}
+
+\section{Conclusion}\label{conclusion}
+
+\section*{References}\label{references}
+\addcontentsline{toc}{section}{References}
+
+\hypertarget{refs}{}
+\hypertarget{ref-RCoreTeam}{}
+R Core Team. 2017. \emph{R: A Language and Environment for Statistical
+Computing}. Vienna, Austria: R Foundation for Statistical Computing.
+\url{https://www.R-project.org/}.
 
 
 \end{document}

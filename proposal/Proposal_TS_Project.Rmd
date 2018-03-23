@@ -1,0 +1,188 @@
+---
+title: "Proposal"
+author: "Time series_spruce_sub900 Analysis"
+date: "8 März 2018"
+bibliography: ../final_project.bib
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Data
+
+Dendrochronology data has been supplied by the archaeological service of the canton Berne [@dendroBern] through a personal contact at the dendrology laboratory in Sutz, BE.
+
+The chronologies have been compiled from individual measurements in the canton of Berne. Typically, the wooden structure of old buildings is sampled by boring the beams. The drilling core is then analyzed by microscoping, recording the sequence of tree ring widht. Subsequently, the sample is matched with existing chronological data, serving the double purpose of strengthening the chronology by overlaying a certain period with more evidence as well as dating the sample in an effort to date the construction year of the sampled building.
+
+All chronologies end in 2017 and have varying lengths of at least 650 years.
+The supplier of the data recommended ignoring data after 1800 due to an insufficient amount of data (individual treering measurements to compute a robust annual mean) for the period after 1800.
+
+## Spruce data above 900 m
+This chronology was compiled from buildings in the Bernese Oberland which are located above 900 m. Spruce was a common building material and there is a wealth of houses supplying data. It is almost sure that trees have not been transported uphill when building houses, so this data can be assumed to originate almost entirely from trees that grew above 900 m. It is known that treering width at high altitudes is mostly dependent on the average temperature during spring.
+
+## Spruce data below 900 m
+Originating also mostly from sampled buildings, this chronology is not sure to only contain data from trees that grew in the lower regions on the canton of Berne. The original author of the data tried to clean the data by only including samples that are below Thun in the Bernese Oberland. It can be assumed that most of the measured samples did actually grow at low altitude. Tree growth mostly depends on the yearly precipitation as the temperature effect is less pronounced at these altitudes.
+
+## Preliminary Analysis
+```{r preparedata, echo=FALSE}
+# Reading in the spruce data for altitudes below 900 m
+spruce_sub900 <- read.table("../data/62163_picea_sub900.txt",
+                                      skip=4,nrows=89)
+spruce_sub900_lastrow <- read.table("../data/62163_picea_sub900.txt",
+                                              skip=94,nrows=1)
+
+# Spruce data above 900 m
+spruce_sup900 <- read.table("../data/62167_picea_abv900.txt",
+                            skip=4,nrows=68)
+spruce_sup900_lastrow <- read.table("../data/62167_picea_abv900.txt",
+                            skip=72,nrows=1)
+
+ssub9 <- spruce_sub900[,-c(1,2,3)]
+ssub9l <- spruce_sub900_lastrow[,-c(1,2,3)]
+
+ssup9 <- spruce_sup900[,-c(1,2,3)]
+ssup9l <- spruce_sup900_lastrow[,-c(1,2,3)]
+
+series_spruce_sub900 <- c()
+for (i in 1:nrow(ssub9)) {
+    for(j in 1:ncol(ssub9)){
+        series_spruce_sub900 <- c(series_spruce_sub900,as.integer(ssub9[i,j]))
+    }
+}
+series_spruce_sub900 <- c(series_spruce_sub900,as.integer(ssub9l))
+
+series_spruce_sup900 <- c()
+for (i in 1:nrow(ssup9)) {
+    for (j in 1:ncol(ssup9)) {
+        series_spruce_sup900 <- c(series_spruce_sup900,as.integer(ssup9[i,j]))
+    }    
+}
+series_spruce_sup900 <- c(series_spruce_sup900,as.integer(ssup9l))
+# Some preliminary analyses
+library(itsmr)
+
+spruce_sub900_ts <- ts(series_spruce_sub900,start=1121,end=1800)
+spruce_sup_900_ts <- ts(series_spruce_sup900, start=1332,end=1800)
+
+```
+
+
+
+```{r plotdata, fig.cap="Timeseries for spruce below / above 900 m"}
+par(mfrow=c(1,2))
+plot(spruce_sub900_ts,
+     main="Spruce, < 900 m",
+     ylab="tree ring width [1/100 mm]",
+     xlab="year")
+
+plot(spruce_sup_900_ts,
+     main="Spruce, > 900 m",
+     ylab="tree ring width [1/100 mm]",
+     xlab="year")
+
+```
+
+
+### Spruce below 900 m
+A first analysis of the time series for spruce below 900 m
+```{r modelfitting}
+t <- seq(from=1,length=length(spruce_sub900_ts))
+model <- lm(spruce_sub900_ts~t)
+summary(model) # cubic trend is still significant
+
+resid_spruce_sub900 <- residuals(model)
+resid_spruce_sub900_ts <- ts(resid_spruce_sub900,end=1800)
+mean(resid_spruce_sub900_ts) # ~ zero mean
+qqnorm(resid_spruce_sub900_ts) # close to a normal distribution
+hist(resid_spruce_sub900_ts) # slightly right-skewed
+
+plotc(resid_spruce_sub900_ts)
+
+Box.test(resid_spruce_sub900_ts,lag=200,type="Ljung-Box")
+# Reject H0: The residuals are not iid
+# Which was to be expected, given the nature of the data
+
+# Sample ACF shows non-stationarity.
+acf(resid_spruce_sub900_ts,lag.max = 250)
+
+# try to paramtrize an AR(1) model
+ar1d1 <- resid_spruce_sub900[1:(length(resid_spruce_sub900)-1)]
+ar1d2 <- resid_spruce_sub900[-1]
+plot(ar1d2~ar1d1)
+ar1_model <- lm(ar1d2~ar1d1)
+summary(ar1_model) # 
+acf(ar1_model$residuals,lag.max = 200) # already looks a lot better, but to many gamma(h) outside of range
+
+# AR(2)?
+ar2d1 <- resid_spruce_sub900[1:(length(resid_spruce_sub900)-2)]
+ar2d2 <- resid_spruce_sub900[2:(length(resid_spruce_sub900)-1)]
+ar2d3 <- resid_spruce_sub900[3:length(resid_spruce_sub900)]
+ar2_model <- lm(ar2d3~ar2d1+ar2d2)
+summary(ar2_model)
+acf(ar2_model$residuals) # still not...
+
+pacf(resid_spruce_sub900_ts,100)
+pacf(ar2_model$residuals,100) #
+
+
+```
+
+### Spruce above 900 m
+A first analysis of the time series for spruce above 900 m
+```{r modelfitting_sup900}
+t <- seq(from=1,length=length(spruce_sup_900_ts))
+model <- lm(spruce_sup_900_ts~t)
+summary(model) # cubic trend is still significant
+
+resid_spruce_sup900 <- residuals(model)
+resid_spruce_sup900_ts <- ts(resid_spruce_sup900,end=1800)
+mean(resid_spruce_sub900_ts) # ~ zero mean
+qqnorm(resid_spruce_sup900_ts) # close to a normal distribution
+hist(resid_spruce_sup900_ts) # slightly right-skewed
+
+plotc(resid_spruce_sup900_ts)
+
+Box.test(resid_spruce_sup900_ts,lag=200,type="Ljung-Box")
+# Reject H0: The residuals are not iid
+# Which was to be expected, given the nature of the data
+
+# Sample ACF shows non-stationarity.
+acf(resid_spruce_sup900_ts,lag.max = 250)
+
+# try to paramtrize an AR(1) model
+ar1d1 <- resid_spruce_sup900[1:(length(resid_spruce_sup900)-1)]
+ar1d2 <- resid_spruce_sup900[-1]
+plot(ar1d2~ar1d1)
+ar1_model <- lm(ar1d2~ar1d1)
+summary(ar1_model) # 
+acf(ar1_model$residuals,lag.max = 200) # already looks a lot better, but to many gamma(h) outside of range
+
+# AR(2)?
+ar2d1 <- resid_spruce_sup900[1:(length(resid_spruce_sup900)-2)]
+ar2d2 <- resid_spruce_sup900[2:(length(resid_spruce_sup900)-1)]
+ar2d3 <- resid_spruce_sup900[3:length(resid_spruce_sup900)]
+ar2_model <- lm(ar2d3~ar2d1+ar2d2)
+summary(ar2_model)
+acf(ar2_model$residuals) # still not...
+
+pacf(resid_spruce_sup900_ts,100)
+pacf(ar2_model$residuals,100) #
+
+
+```
+
+# Questions to be answered
+
+Climatic trends are to be identified by analyzing the correlation between 3 different chronologies.
+
+# Methods
+
+The project team will answer the questions using the following methods:
+
+* Method 1
+* Method 2
+
+
+# References
