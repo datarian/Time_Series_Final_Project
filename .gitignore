@@ -2,9 +2,9 @@
 .Rhistory
 .RData
 .Ruserdata
-./*figure*/*.pdf
 tex2pdf*
 data/*picea*
 data/*abies*
 data/dendrochrono_raw.txt
 data/dendrochronologies.Rdata
+proposal/Proposal_TS_Project_files/

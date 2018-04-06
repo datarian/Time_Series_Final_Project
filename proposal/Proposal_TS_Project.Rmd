@@ -186,10 +186,6 @@ acf(ar2_model$residuals) # still not...
 pacf(resid_spruce_sup900_ts,100)
 pacf(ar2_model$residuals,100) #
 
-# Determine the AR process automatically
-
-sup900_ar <- ar(resid_spruce_sup900_ts)
-
 
 ```
 
