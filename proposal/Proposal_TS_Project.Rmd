@@ -22,9 +22,6 @@ The supplier of the data recommended ignoring data after 1800 due to an insuffic
 ## Spruce data above 900 m
 This chronology was compiled from buildings in the Bernese Oberland which are located above 900 m. Spruce was a common building material and there is a wealth of houses supplying data. It is almost sure that trees have not been transported uphill when building houses, so this data can be assumed to originate almost entirely from trees that grew above 900 m. It is known that treering width at high altitudes is mostly dependent on the average temperature during spring.
 
-## Spruce data below 900 m
-Originating also mostly from sampled buildings, this chronology is not sure to only contain data from trees that grew in the lower regions on the canton of Berne. The original author of the data tried to clean the data by only including samples that are below Thun in the Bernese Oberland. It can be assumed that most of the measured samples did actually grow at low altitude. Tree growth mostly depends on the yearly precipitation as the temperature effect is less pronounced at these altitudes.
-
 ## Preliminary Analysis
 ```{r preparedata, echo=FALSE}
 # Reading in the spruce data for altitudes below 900 m

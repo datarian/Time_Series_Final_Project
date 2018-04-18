@@ -1,6 +1,7 @@
 library(itsmr)
 library(tseries)
 library(MASS)
+library(forecast)
 
 spruce_sup900 <- read.table("./data/62167_picea_abv900.txt",
                             skip=4,nrows=68)
@@ -30,9 +31,32 @@ climate_ts <- ts(climate$Temp..Anom.,start=16,end=1935)
 
 # getting windows of the two series from 1332 to 1800:
 spruce_window <- window(spruce_sup_900_ts,end=c(1800))
+
+log_spruce_window <- log(spruce_window)
+t <- seq(1,length(spruce_window))
+log_t <- log(t)
+
+d <- data.frame(cbind(log_spruce_window,log_t))
+
+t_spruce_window <- nls(spruce_window ~ alpha * t^beta * exp(t),
+                       data = d,
+                       start=list(alpha=0.4, beta=0.8)
+                       )
+
+
+model1 <- lm(log_spruce_window ~ log_t)
+
+plot(resid(model1))
+
+kpss.test(resid(model1))
+
+acf(resid(model1))
+
+pacf(resid(model1))
+
 climate_window <- window(climate_ts,start=start(spruce_window),end=end(spruce_window))
 
-plotc(spruce_window)
+plotc(log(spruce_window))
 
 # First try: yearly temperature anomalies as a covariate.
 t <- seq(1,length(spruce_window))
@@ -60,6 +84,15 @@ Box.test(climate_model$residuals,lag=5,type="Ljung-Box")
 # --> No luck
 
 ###############
+
+# Find lambdas. MLE-estimation
+lambdas <- boxcox(spruce_window~t+offset_climate)
+l <- lambdas$x[which.max(lambdas$y)] # this is the MLE lambda to transform data
+
+spruce_window_boxcox <- (spruce_window^l-1)/l # Box-Cox transformation
+
+plotc(spruce_window_boxcox)
+
 # New approach: offset between climatic data and treerings?
 climate_window_long <- window(climate_ts,start=(start(spruce_window)[1]-50),end=end(spruce_window))
 
@@ -98,8 +131,44 @@ summary(climate_offset_model_boxcox)
 plotc(climate_offset_model_boxcox$residuals)
 qqnorm(climate_offset_model_boxcox$residuals);qqline(climate_offset_model_boxcox$residuals)
 
-plotc(diff(climate_model_boxcox$residuals))
-kpss.test(diff(climate_model_boxcox$residuals))
-Box.test(diff(climate_model_boxcox$residuals),type="Ljung-Box") # independency okay
+plotc(diff(climate_offset_model_boxcox$residuals))
+kpss.test(diff(climate_offset_model_boxcox$residuals))
+Box.test(diff(climate_offset_model_boxcox$residuals),type="Ljung-Box") # independency okay
 acf(diff(climate_model_boxcox$residuals))
 pacf(diff(climate_model_boxcox$residuals))
+
+
+## Trying the auto.arima method
+
+if (require("forecast", character.only = TRUE)) {
+    sup900.arima <- auto.arima(spruce_sup_900_ts, ic="bic")
+    summary(sup900.arima)
+    head(residuals(sup900.arima))
+    coef(sup900.arima)
+    acf(residuals(sup900.arima),plot=FALSE)
+}
+
+
+# Frequency analysis
+redf.dat <- redfit(spruce_sup_900_ts, nsim = 1000)
+par(tcl = 0.5, mar = rep(2.2, 4), mgp = c(1.1, 0.1, 0))
+plot(redf.dat[["freq"]], redf.dat[["gxxc"]],
+       ylim = range(redf.dat[["ci99"]], redf.dat[["gxxc"]]),
+       type = "n", ylab = "Spectrum (dB)", xlab = "Frequency (1/yr)",
+       axes = FALSE)
+grid()
+lines(redf.dat[["freq"]], redf.dat[["gxxc"]], col = "#1B9E77")
+lines(redf.dat[["freq"]], redf.dat[["ci99"]], col = "#D95F02")
+lines(redf.dat[["freq"]], redf.dat[["ci95"]], col = "#7570B3")
+lines(redf.dat[["freq"]], redf.dat[["ci90"]], col = "#E7298A")
+freqs <- pretty(redf.dat[["freq"]])
+pers <- round(1 / freqs, 2)
+axis(1, at = freqs, labels = TRUE)
+axis(3, at = freqs, labels = pers)
+mtext(text = "Period (yr)", side = 3, line = 1.1)
+axis(2); axis(4)
+legend("topright", c("dat", "CI99", "CI95", "CI90"), lwd = 2,
+         col = c("#1B9E77", "#D95F02", "#7570B3", "#E7298A"),
+         bg = "white")
+box()
+par(op)

@@ -1,4 +1,4 @@
-# Time series project: Dendro data 
+# Time series project: Dendro data
 
 library(treeclim)
 library(dplR) # package containing the Arizona dendro dataset
@@ -13,7 +13,7 @@ library(tseries)
 # [4] https://digitalcommons.wayne.edu/cgi/viewcontent.cgi?article=1583&context=jmasm (Variance stabilizing power transformation for time series)
 
 
-# data [1], p.37: This data set includes ring-width measurements for ponderosa pine (Pinus ponderosa) increment cores collected at the Gus Pearson Natural Area (GPNA) 
+# data [1], p.37: This data set includes ring-width measurements for ponderosa pine (Pinus ponderosa) increment cores collected at the Gus Pearson Natural Area (GPNA)
 # in northern Arizona, USA. There are 58 series from 29 trees (2 cores per tree). Data are further described by Biondi and Qeadan (2008) and references therein.
 data(gp.rwl)
 
@@ -27,9 +27,21 @@ plot(y=means, x=1:length(means), type="l")
 # differenced time sereis
 data_diff <- diff(means)
 
+log_mean <- log(means)
+
+
+
+
+
+
+
+
+
+
+
 plot(y=data_diff, x=1:length(data_diff), type="l")
 
-# H0: stationary cannot be rejected. But data 
+# H0: stationary cannot be rejected. But data
 kpss.test(data_diff)
 
 # is this MA(2)?
