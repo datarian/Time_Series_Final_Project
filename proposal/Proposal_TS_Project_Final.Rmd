@@ -18,6 +18,7 @@ The chronologies have been compiled from individual measurements in the canton o
 
 All chronologies end in 2017 and have varying lengths of at least 650 years.
 The supplier of the data recommended ignoring data after 1800 due to an insufficient amount of data (individual treering measurements to compute a robust annual mean) for the period after 1800.
+hhhjj
 
 ## Spruce data above 900 m
 This chronology was compiled from buildings in the Bernese Oberland which are located above 900 m. Spruce was a common building material and there is a wealth of houses supplying data. It is almost sure that trees have not been transported uphill when building houses, so this data can be assumed to originate almost entirely from trees that grew above 900 m. It is known that treering width at high altitudes is mostly dependent on the average temperature during spring.
