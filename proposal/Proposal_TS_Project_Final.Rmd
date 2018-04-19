@@ -1,13 +1,34 @@
 ---
 title: "Proposal"
-author: "Time series_spruce_sub900 Analysis"
-date: "8 März 2018"
+author: "Time Series Analysis: Dendrochronology"
+date: '`r format(Sys.time(), "%d. %B %Y")`'
 bibliography: ../final_project.bib
-output: pdf_document
+output:
+    pdf_document:
+        toc: no
+        fig_caption: yes
+        fig_height: 6
+        fig_width: 7
+        includes:
+            in_header: ../latex/mystyles.sty
+        keep_tex: no
+        latex_engine: xelatex
+        number_sections: yes
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(error=TRUE,
+                      warning=FALSE,
+                      message=FALSE,
+                      echo=FALSE,
+                      cache=FALSE,
+                      dpi=300,
+                      fig.width=7, # Default figure widths
+                      fig.asp=0.618,
+                      fig.align="center",
+                      fig.path = "./figures/",
+                      out.width = "0.7\\linewidth")
+knitr::opts_knit$set(eval.after='fig.cap')
 ```
 
 # Data
@@ -18,7 +39,6 @@ The chronologies have been compiled from individual measurements in the canton o
 
 All chronologies end in 2017 and have varying lengths of at least 650 years.
 The supplier of the data recommended ignoring data after 1800 due to an insufficient amount of data (individual treering measurements to compute a robust annual mean) for the period after 1800.
-hhhjj
 
 ## Spruce data above 900 m
 This chronology was compiled from buildings in the Bernese Oberland which are located above 900 m. Spruce was a common building material and there is a wealth of houses supplying data. It is almost sure that trees have not been transported uphill when building houses, so this data can be assumed to originate almost entirely from trees that grew above 900 m. It is known that treering width at high altitudes is mostly dependent on the average temperature during spring.
@@ -29,9 +49,9 @@ Stationarity has been demonstrated.
 
 ### Transformations
 
-A polynomial of order 2 has been fitted to the raw data. Then, the residuals have been divided by the fitted values (see [@woollons1990time]).
+A polynomial of order 2 has been fitted to the raw data. Then, the residuals have been divided by the fitted values as described by [@woollons1990time].
 
-```{r preparedata}
+```{r preparedata, echo=TRUE}
 library(itsmr)
 library(tseries)
 library(MASS)
@@ -52,18 +72,14 @@ for (i in 1:nrow(ssup9)) {
 }
 series_spruce_sup900 <- c(series_spruce_sup900,as.integer(ssup9l))
 spruce_sup_900_ts <- ts(series_spruce_sup900, start=1332)
+save(spruce_sup_900_ts, file="spruce_sup_900_ts.Rda")
 
 
-plot(spruce_sup_900_ts,
-     main="Spruce, > 900 m",
-     ylab="tree ring width [1/100 mm]",
-     xlab="year")
+```
 
-
-# getting windows of the two series from 1332 to 1800:
+```{r prelimanalysis, echo=TRUE}
+# getting window of the two series from 1332 to 1800:
 spruce_window <- window(spruce_sup_900_ts,end=c(1800))
-climate_window <- window(climate_ts,start=start(spruce_window),end=end(spruce_window))
-plotc(spruce_window)
 
 log_spruce_window <- log(spruce_window)
 t <- seq(1,length(spruce_window))
@@ -71,42 +87,61 @@ t2 <- t^2
 
 d <- data.frame(cbind(log_spruce_window,t,t2))
 
-#log_t <- log(t)
-#m1 <- lm(log_spruce_window ~ log_t)
-#summary(m1)
+
 
 m2 <- lm(log_spruce_window ~ t+t2,data=d)
 summary(m2)
 
 # Transformation of residuals
 i <- (m2$residuals/m2$fitted.values)
+```
 
+### Diagnostic plots
+
+The original time series, transformed residuals, acf and pacf.
+
+```{r plotraw, fig.cap="Raw chronology", echo=FALSE}
+plot(spruce_sup_900_ts,
+     main="Spruce, > 900 m raw data",
+     ylab="tree ring width [1/100 mm]",
+     xlab="year")
+```
+
+```{r plotwindow, fig.cap="Window used in the analysis, cut at year 1800"}
+plotc(spruce_window)
+```
+
+```{r plottransformed, fig.cap="The transformed residuals of the initial detrending fit."}
 plotc(i)
-acf(i)
-pacf(i)
+```
 
+```{r acf, fig.cap="ACF"}
+acf(i)
+```
+
+```{r pacf, fig.cap="PACF"}
+pacf(i)
+```
+
+
+### Tests for stationarity
+
+```{r stationaritytests, echo=TRUE}
 kpss.test(i)
 adf.test(i)
 pp.test(i)
-
-model_ar2 <- arima(i,order=c(2,0,0))
-summary(model_ar2)
-
-model_arma11 <- arima(i,order=c(1,0,1))
-summary(model_arma11)
 ```
 
 # Questions to be answered
 
-    * Hypothetical missing values will be imputed using model predictions.
-    * If time permits, the impact of exogenous (climatic) data [@NOAA] will be studied for a small subset (1895 - 1990) of another timeseries [@dplR].
+- Hypothetical missing values will be imputed using model predictions.
+- If time permits, the impact of exogenous (climatic) data [@noaa] will be studied for a small subset (1895 - 1990) of another timeseries [@dplR].
 
 # Methods
 
 The project team will answer the questions using the following methods:
 
-    * Finding the best model through R's methods autofit, best.ARMA2 and so on
-    * Prediction of missing values with the obtained model vs. using a dedicated R package [@moritz2015imputets]
-
+- Finding the best model through R's methods autofit, best.ARMA2 and so on
+- Prediction of missing values with the obtained model vs. using a dedicated R package [@moritz2015imputets]
 
 # References
