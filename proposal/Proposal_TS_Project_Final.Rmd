@@ -38,18 +38,18 @@ Dendrochronology data has been supplied by the archaeological service of the can
 The chronologies have been compiled from individual measurements in the canton of Berne. Typically, the wooden structure of old buildings is sampled by boring the beams. The drilling core is then analyzed by microscoping, recording the sequence of tree ring widht. Subsequently, the sample is matched with existing chronological data, serving the double purpose of strengthening the chronology by overlaying a certain period with more evidence as well as dating the sample in an effort to date the construction year of the sampled building.
 
 All chronologies end in 2017 and have varying lengths of at least 650 years.
-The supplier of the data recommended ignoring data after 1800 due to an insufficient amount of data (individual treering measurements to compute a robust annual mean) for the period after 1800.
+The supplier of the data recommended to ignore data after 1800 due to an insufficient amount of data. For this analysis, data that was collected above 900 meters will be used.
 
 ## Spruce data above 900 m
-This chronology was compiled from buildings in the Bernese Oberland which are located above 900 m. Spruce was a common building material and there is a wealth of houses supplying data. It is almost sure that trees have not been transported uphill when building houses, so this data can be assumed to originate almost entirely from trees that grew above 900 m. It is known that treering width at high altitudes is mostly dependent on the average temperature during spring.
+As said before, the chronology of interest for this project is compiled from buildings in the Bernese Oberland which are all located above 900 meters. Spruce was a common building material and there is a wealth of houses supplying data. The data can be assumed to originate almost entirely from trees that grew above 900 meters because trees were almost never transported uphill for building houses. We can also assume that freshly cut timber was used to construct the houses. Hence, by knowing when the house was built tree ring data can be dated.
 
 ## Preliminary Analysis
 
-Stationarity has been demonstrated.
+The series of raw tree ring widths is not stationary. In the next subsection, a demonstration of how to transform the data to get a stationary time series follows.
 
 ### Transformations
 
-A polynomial of order 2 has been fitted to the raw data. Then, the residuals have been divided by the fitted values as described by [@woollons1990time].
+For the transformation, we follow the work of [@woollons1990time] who proposes first to detrend the data by fitting a polynomial. A polynomial of order 2 seems to be sufficient in our case. Second, the residuals are divided by the fitted values. To our understanding this helps to deal with the heteroscedasticity that is immanent in the data.
 
 ```{r preparedata, echo=TRUE}
 library(itsmr)
@@ -96,9 +96,11 @@ summary(m2)
 i <- (m2$residuals/m2$fitted.values)
 ```
 
-### Diagnostic plots
+### Plots of the Untransformed and Transformed Time Series
 
-The original time series, transformed residuals, acf and pacf.
+Next we plot the original time series with data from 1332 till 2017, a subset till 1800, and the transformed time series of the subset. The shape of the untransformed series is a result of how many young trees are in the sample but also the result of the climatic conditions. Younger trees grow faster than older trees. Measurements for dates far in the past may come mostly from old trees that were back then young. We may see the Medieval Warm Period, which ended before 1400, being most prevalent in the period from 900 to 1250, and the Little Ice Age form 1300 to 1850. Beside the temperature several other weather, but also soil conditions have an influence. 
+
+The transformation we have performed is not perfect because the third plot still shows some heteroscedasticity, but this is the best we have achieved so far. Test results regarding stationary are presented in the next subsection.
 
 ```{r plotraw, fig.cap="Raw chronology", echo=FALSE}
 plot(spruce_sup_900_ts,
@@ -115,6 +117,20 @@ plotc(spruce_window)
 plotc(i)
 ```
 
+### Tests for Stationarity
+
+We perfom the kpss, adf and pp test to test the stationarity assumption. All three tests indicate that the transformed time series is stationary. The test results are shown below.
+
+```{r stationaritytests, echo=TRUE}
+kpss.test(i)
+adf.test(i)
+pp.test(i)
+```
+
+### First Guess of the Process
+
+To get a first intuition about the process, we show the sample ACF and PACF. The ACF exponentially decreases. The PACF shows two significant spikes. All in all, the two plots indicate that the transformed tree ring widths may follow an AR(2) process.
+
 ```{r acf, fig.cap="ACF"}
 acf(i)
 ```
@@ -124,24 +140,23 @@ pacf(i)
 ```
 
 
-### Tests for stationarity
+# Goal of the Analysis
 
-```{r stationaritytests, echo=TRUE}
-kpss.test(i)
-adf.test(i)
-pp.test(i)
-```
+In this project we would like to learn more about imputation techniques. Our idea is to 'contaminate' the times series with missing values and then try to reconstruct the time series based on the data whe have. However, if this is too complicated we will switch to making predictions.
 
-# Questions to be answered
-
-- Hypothetical missing values will be imputed using model predictions.
-- If time permits, the impact of exogenous (climatic) data [@noaa] will be studied for a small subset (1895 - 1990) of another timeseries [@dplR].
+We mentioned that tree rings are also affected by climatic and soil conditions. The dplr package comes with a nice ring width times series from trees located in Arizona [see @dplR]. From 1895 on, the National Oceanic and Atmospheric Administration of the United States (NOAA) is collecting monthly weather data for each State. If time permits our idea is to answer the same questions as above using this (small) dataset. 
 
 # Methods
 
 The project team will answer the questions using the following methods:
 
-- Finding the best model through R's methods autofit, best.ARMA2 and so on
-- Prediction of missing values with the obtained model vs. using a dedicated R package [@moritz2015imputets]
+- To find the best model we will use plots, and methods in R as e.g. the autofit function. Of course we will also refer to the literature.
+- The R package imputeTS facilitates time series missing value imputations [see @moritz2015imputets]. If we decide to deal with imputations, this is propably the package we will use / rely on.
+
+# Project Team
+Florian Hostrasser
+
+David Fischer
+
 
 # References
