@@ -50,11 +50,11 @@ knitr::opts_knit$set(eval.after='fig.cap')
 
 # Methods
 
-## Fitting
+## Fitting -> David
 
 ## imputing strategies -> Florian
 
-    - imputeTS: na.kalman
+    - imputeTS: na.kalman -> emphasize this
     
     - forecast: na.interp
     
@@ -66,11 +66,11 @@ knitr::opts_knit$set(eval.after='fig.cap')
 
 ## Data
 
-- Transformation, model fitting
+- Transformation, model fitting 
 
 - Introduce missing values
 
-## Imputation
+## Imputation -> Florian
 
 - imputation using different strategies
 
