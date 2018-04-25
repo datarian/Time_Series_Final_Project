@@ -13,7 +13,7 @@ output:
             in_header: ../latex/mystyles.sty
         keep_tex: no
         latex_engine: xelatex
-        number_sections: yes
+        number_sections: true
 ---
 
 ```{r setup, include=FALSE}
@@ -130,7 +130,7 @@ pp.test(i)
 
 ### First Guess of the Process
 
-To get a first intuition about the process, we show the sample ACF and PACF. The ACF exponentially decreases. The PACF shows two significant spikes. All in all, the two plots indicate that the transformed tree ring widths may follow an AR(2) process.
+To get a first intuition about the process, we show the sample ACF and PACF. The ACF decreases linearly. The PACF shows two significant spikes. All in all, the two plots indicate that the transformed tree ring widths may follow an AR(2) process.
 
 ```{r acf, fig.cap="ACF"}
 acf(i)
@@ -155,7 +155,7 @@ The project team will answer the questions using the following methods:
 - The R package imputeTS facilitates time series missing value imputations [see @moritz2015imputets]. If we decide to deal with imputations, this is propably the package we will use / rely on.
 
 # Project Team
-Florian Hostrasser
+Florian Hochstrasser
 
 David Fischer
 
