@@ -35,13 +35,14 @@ knitr::opts_knit$set(eval.after='fig.cap')
 
 Dendrochronology data has been supplied by the archaeological service of the canton Berne [@dendroBern] through a personal contact at the dendrology laboratory in Sutz, BE.
 
-The chronologies have been compiled from individual measurements in the canton of Berne. Typically, the wooden structure of old buildings is sampled by boring the beams. The drilling core is then analyzed by microscoping, recording the sequence of tree ring widht. Subsequently, the sample is matched with existing chronological data, serving the double purpose of strengthening the chronology by overlaying a certain period with more evidence as well as dating the sample in an effort to date the construction year of the sampled building.
-
-All chronologies end in 2017 and have varying lengths of at least 650 years.
-The supplier of the data recommended to ignore data after 1800 due to an insufficient amount of data. For this analysis, data that was collected above 900 meters will be used.
+Typically, the wooden structure of old buildings is sampled by boring the beams. The drilling core is then analyzed by microscoping, recording the sequence of tree ring widths. Subsequently, the sample is matched with existing chronological data, serving the double purpose of strengthening the chronology by overlaying a certain period with more evidence as well as dating the sample in an effort to date the construction year of the sampled building.
 
 ## Spruce data above 900 m
-As said before, the chronology of interest for this project is compiled from buildings in the Bernese Oberland which are all located above 900 meters. Spruce was a common building material and there is a wealth of houses supplying data. The data can be assumed to originate almost entirely from trees that grew above 900 meters because trees were almost never transported uphill for building houses. We can also assume that freshly cut timber was used to construct the houses. Hence, by knowing when the house was built tree ring data can be dated.
+The chronology used for this project has been compiled from individual measurements of buildings in the Bernese Oberland which are all located above 900 meters. Spruce was a common building material and there is a wealth of houses supplying data. The data can be assumed to originate almost entirely from trees that grew above 900 meters because trees were almost never transported uphill for building houses. We can also assume that freshly cut timber was used to construct the houses. 
+
+The chronology starts in 1332 and ends in 2017, spanning 685 years. The supplier of the data recommended to ignore data after 1800 due to an insufficient amount of data for these years.
+
+The predictor represents the yearly mean tree ring width of all the individual measurements with data for a given year. The unit is `mm`.
 
 ## Preliminary Analysis
 
@@ -51,7 +52,7 @@ The series of raw tree ring widths is not stationary. In the next subsection, a 
 
 For the transformation, we follow the work of [@woollons1990time] who proposes first to detrend the data by fitting a polynomial. A polynomial of order 2 seems to be sufficient in our case. Second, the residuals are divided by the fitted values. To our understanding this helps to deal with the heteroscedasticity that is immanent in the data.
 
-```{r preparedata, echo=TRUE}
+```{r preparedata, echo=FALSE, results='hide'}
 library(itsmr)
 library(tseries)
 library(MASS)
@@ -77,7 +78,7 @@ save(spruce_sup_900_ts, file="spruce_sup_900_ts.Rda")
 
 ```
 
-```{r prelimanalysis, echo=TRUE}
+```{r prelimanalysis, echo=FALSE,results='hide'}
 # getting window of the two series from 1332 to 1800:
 spruce_window <- window(spruce_sup_900_ts,end=c(1800))
 
@@ -121,7 +122,7 @@ plotc(i)
 
 We perfom the kpss, adf and pp test to test the stationarity assumption. All three tests indicate that the transformed time series is stationary. The test results are shown below.
 
-```{r stationaritytests, echo=TRUE}
+```{r stationaritytests, echo=FALSE,results='hide'}
 kpss.test(i)
 adf.test(i)
 pp.test(i)
