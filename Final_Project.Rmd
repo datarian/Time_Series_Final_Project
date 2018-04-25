@@ -5,7 +5,7 @@ date: '`r Sys.Date()`'
 bibliography: final_project.bib
 output:
     pdf_document:
-        toc: yes
+        toc: no
         fig_caption: yes
         fig_height: 6
         fig_width: 7
@@ -14,7 +14,7 @@ output:
             before_body: latex/before_body.tex
         keep_tex: yes
         latex_engine: xelatex
-        number_sections: yes
+        number_sections: true
 ---
 
 ```{r setup, include=FALSE}
@@ -29,35 +29,56 @@ knitr::opts_chunk$set(error=TRUE,
                       fig.align="center",
                       fig.path = "./figures/",
                       out.width = "0.7\\linewidth")
-knitr::opts_knit$set(eval.after='fig.cap',
-                     verbose = FALSE,
-                     progress = TRUE)
+knitr::opts_knit$set(eval.after='fig.cap')
 ```
+
+# Abstract
+
+
 
 # Introduction
 
-This project relies heavily on @RCoreTeam.
+- Data used
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+## Dendrochronologies in TS
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+- WOOLLONS: Usually ARMA1,1 / AR1 processes
 
-```{r cars}
-summary(cars)
-```
+- dplR: AR2
+
+- We will look at AR1, ARMA1,1 more closely
 
 # Methods
-You can also embed plots, for example:
 
-```{r pressure, echo=FALSE, fig.cap="Relative rain amount by wind heading."}
-plot(pressure)
-```
+## Fitting
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+## imputing strategies -> Florian
+
+    - imputeTS: na.kalman
+    
+    - forecast: na.interp
+    
+    - zoo: na.approx
+    
+## Use of exogeneous data
 
 # Results & Discussion
 
-# Conclusion
+## Data
+
+- Transformation, model fitting
+
+- Introduce missing values
+
+## Imputation
+
+- imputation using different strategies
+
+- discussion of imputation results
+
+#  & Conclusion
+
+To be seen
 
 # References
 
