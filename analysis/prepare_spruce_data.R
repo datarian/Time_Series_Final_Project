@@ -1,7 +1,5 @@
 library(itsmr)
 library(tseries)
-library(MASS)
-library(forecast)
 
 spruce_sup900 <- read.table("./data/62167_picea_abv900.txt",
                             skip=4,nrows=68)
