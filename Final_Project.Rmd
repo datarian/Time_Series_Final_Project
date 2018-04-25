@@ -33,14 +33,13 @@ knitr::opts_knit$set(eval.after='fig.cap')
 ```
 
 # Abstract
-
-
+words words words
 
 # Introduction
 
 - Data used
 
-## Dendrochronologies in TS
+## Dendrochronologies in TS -> Florian
 
 - WOOLLONS: Usually ARMA1,1 / AR1 processes
 
@@ -62,15 +61,18 @@ knitr::opts_knit$set(eval.after='fig.cap')
     
 ## Use of exogeneous data
 
+
 # Results & Discussion
 
-## Data
+## Data -> David
 
 - Transformation, model fitting 
 
-- Introduce missing values
+
 
 ## Imputation -> Florian
+
+- Introduce missing values
 
 - imputation using different strategies
 
