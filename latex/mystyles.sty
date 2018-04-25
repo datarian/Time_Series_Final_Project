@@ -17,20 +17,20 @@
 \subsectionfont{\sffamily\fontsize{12}{14}\selectfont\uppercase}
 \subsubsectionfont{\sffamily\fontsize{11}{12}\selectfont\uppercase}
 
-\usepackage[bottom]{footmisc}
+%% Header and footer
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyfoot[C]{\thepage}
+\fancyhead[R]{\thetitle}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
 
+\usepackage[bottom]{footmisc}
 
 %% Paragraph and line spacing
 %%\linespread{1.05} % a bit more vertical space
 \setlength{\parskip}{\baselineskip} % space between paragraphs spacing is one baseline unit
 \renewcommand{\arraystretch}{1.5}
-
-%% Sections headings spacing: one baseline unit before, none after
-\usepackage{titlesec}
-\titlespacing{\section}{0pt}{\baselineskip}{0pt}
-\titlespacing{\subsection}{0pt}{\baselineskip}{0pt}
-\titlespacing{\subsubsection}{0pt}{\baselineskip}{0pt}
-
 
 \usepackage[section]{placeins}
 

@@ -1,5 +1,5 @@
 ---
-title: "Final Project"
+title: "Dendrochronologies: Dating wooden artifacts"
 author: "Time Series Analysis"
 date: '`r Sys.Date()`'
 bibliography: final_project.bib
@@ -37,9 +37,15 @@ words words words
 
 # Introduction
 
-- Data used
+Dendrochronology is an archaeological method used for dating artifacts. Chronologies are constructed by measuring the patterns of tree ring widths from individual wooden artifacts, then overlaying the data to build up a continuous series of mean yearly ring widths spanning hundreds to thousands of years. Chronologies are generally constructed for defined geographical regions as the environment (i.e the local climate, soil properties and terrain) has substantial impact on the growth of trees.
 
-## Dendrochronologies in TS -> Florian
+Newly measured artifacts are matched to existing, dated chronologies serving the double purpose of strengthening the chronology and dating the artifact in question.
+
+## Timeseries used
+
+The chronology used for this project has been compiled from individual measurements of buildings in the Bernese Oberland which are all located above 900 meters. Typically, the wooden structure of old buildings is sampled by boring the beams. The drilling core is then analyzed by microscoping, recording the sequence of tree ring widths. Spruce was a common building material and there is a wealth of houses supplying data. The data can be assumed to originate almost entirely from trees that grew above 900 meters since trees were rarely transported uphill. The data has been supplied by the archaeological service of the canton Berne [@dendroBern] through a personal contact at the dendrology laboratory in Sutz, BE.
+
+## Timeseries analysis applied to dendrochronologies
 
 - WOOLLONS: Usually ARMA1,1 / AR1 processes
 
@@ -48,6 +54,12 @@ words words words
 - We will look at AR1, ARMA1,1 more closely
 
 # Methods
+
+## Data
+The chronology spans the years from 1332 to 2017 (685 years). The supplier of the data recommended to ignore data after 1800 due to an insufficient amount of data for these years.
+
+The predictor represents the yearly mean tree ring width of all the individual measurements with data for a given year. The unit is `mm`.
+
 
 ## Fitting -> David
 
@@ -78,7 +90,7 @@ words words words
 
 - discussion of imputation results
 
-#  & Conclusion
+# Conclusion
 
 To be seen
 
