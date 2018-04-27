@@ -72,6 +72,54 @@ rwl_df <- rwl_df[,-1]
 dplR::rwl.report(rwl_df)
 dplR::summary.rwl(rwl_df)
 
-rwi <- detrend(rwl_df,make.plot = T,method = "ModNegExp")
 
-plot(rwl_df,plot.type="spag")
+rwi <- detrend(rwl_df,make.plot = F,method = "Mean")
+
+
+# plot the obtained chronology. A nice feature is the information on the sample
+# depth!
+rwi.crn <- chron(rwi)
+plot(rwi.crn,add.spline=T,nyrs=20)
+
+# Manually construct the time series from the yearly mean ring widhts, then
+# dividing by the SD to remove some homoscedasticity
+mean_rwl <- rowMeans(rwl_df,na.rm = T)
+sd_rwl <- apply(rwl_df,1,sd,na.rm=T)
+
+
+library(itsmr)
+
+rwl_ts <- ts(mean_rwl,end=2017)
+rwl_ts_stab <- rwl_ts/sd_rwl
+plotc(rwl_ts)
+
+
+# limiting the series to the window 1400 ... 1800 (start chosen because of very low
+# sample depth before that year)
+
+rwl_ts_window <- window(rwl_ts_stab,start=c(1400),end=c(1800))
+plotc(rwl_ts_window)
+
+rwl_ts_window_log <- log(rwl_ts_window)
+plotc(rwl_ts_window_log)
+
+t <- seq(1,length(rwl_ts_window))
+t2 <- t^2
+
+m <- lm(rwl_ts_window_log ~ t)
+summary(m)
+
+m2 <- lm(rwl_ts_window_log ~ t+t2)
+summary(m2)
+
+
+acf(rwl_ts_window_log)
+pacf(rwl_ts_window_log)
+
+
+# Maybe another approach? -> Weighing by sample depth?
+weight_function <- function(x){
+    n <- sum(!is.na(x))
+    1 - ((ncol(rwl_df)-n)/ncol(rwl_df))
+}
+weight_rwl <- apply(rwl_df, 1, weight_function)
