@@ -1,7 +1,13 @@
-####
 #### Individual series
+# This script parses the raw data file 900+.txt and builds a dataframe in 'rwl'
+# format, a standard for dendrochronological data.
+# It also computes the mean value chronology and does som preliminary analysis
+# of the data.
+
 library(readtext)
 library(stringr)
+library(dplR)
+library(itsmr)
 
 file_contents <- readtext("data/900+.txt")
 
@@ -29,16 +35,16 @@ for (i in 1:nrow(chronology)) {
 }
 
 # We now have three objects to construct the aggregated chronology dataframe:
-# chron_numbers: the sample numbers
-# chron_years: the dated years of the sample
-# chron_rings: The sequence of yearly ring widths of the sample
+# chron_numbers: the sample numbers (identifier)
+# chron_years: the dated years of the samples
+# chron_rings: The sequence of yearly ring widths of the samples
 
 # construct the sequence of years spanning the data. For the oldest year, we need
 # the minimum of dated year - age of tree
-oldest <- 10000
+oldest <- 10000 # initialize with a ridiculously high number
 for(i in 1:length(chron_years)){
     currentsample <- chron_years[i]-(length(chron_rings[[i]])-1)
-    oldest <- ifelse(currentsample < oldestring,currentsample,oldestring)
+    oldest <- ifelse(currentsample < oldest, currentsample, oldest)
 }
 
 newest <- max(chron_years)
@@ -73,21 +79,19 @@ dplR::rwl.report(rwl_df)
 dplR::summary.rwl(rwl_df)
 
 
-rwi <- detrend(rwl_df,make.plot = F,method = "Mean")
+rwi <- dplR::detrend(rwl_df,make.plot = F,method = "Mean")
 
 
 # plot the obtained chronology. A nice feature is the information on the sample
 # depth!
-rwi.crn <- chron(rwi)
+rwi.crn <- dplR::chron(rwi)
 plot(rwi.crn,add.spline=T,nyrs=20)
 
 # Manually construct the time series from the yearly mean ring widhts, then
 # dividing by the SD to remove some homoscedasticity
-mean_rwl <- rowMeans(rwl_df,na.rm = T)
+mean_rwl <- apply(rwl_df,1,mean,na.rm=T)
 sd_rwl <- apply(rwl_df,1,sd,na.rm=T)
 
-
-library(itsmr)
 
 rwl_ts <- ts(mean_rwl,end=2017)
 rwl_ts_stab <- rwl_ts/sd_rwl
@@ -111,10 +115,13 @@ summary(m)
 
 m2 <- lm(rwl_ts_window_log ~ t+t2)
 summary(m2)
+# Nope, order 1 seems okay.
+
+plotc(m$residuals)
 
 
-acf(rwl_ts_window_log)
-pacf(rwl_ts_window_log)
+acf(m$residuals) # looks exponential now.
+pacf(m$residuals)
 
 
 # Maybe another approach? -> Weighing by sample depth?
