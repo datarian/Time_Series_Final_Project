@@ -8,6 +8,7 @@ library(readtext)
 library(stringr)
 library(dplR)
 library(itsmr)
+library(MASS)
 
 file_contents <- readtext("data/900+.txt")
 
@@ -80,19 +81,27 @@ dplR::summary.rwl(rwl_df)
 
 
 rwi <- dplR::detrend(rwl_df,make.plot = F,method = "Mean")
-
-
 # plot the obtained chronology. A nice feature is the information on the sample
 # depth!
 rwi.crn <- dplR::chron(rwi)
 plot(rwi.crn,add.spline=T,nyrs=20)
 
+
+
+#*******************************************************************************
 # Manually construct the time series from the yearly mean ring widhts, then
 # dividing by the SD to remove some homoscedasticity
 mean_rwl <- apply(rwl_df,1,mean,na.rm=T)
 sd_rwl <- apply(rwl_df,1,sd,na.rm=T)
 
+depth <- function(x){
+    sum(!is.na(x))
+}
 
+depth_rwl <- apply(rwl_df,1,depth)
+
+
+# Creating initial ts
 rwl_ts <- ts(mean_rwl,end=2017)
 rwl_ts_stab <- rwl_ts/sd_rwl
 plotc(rwl_ts)
@@ -100,10 +109,35 @@ plotc(rwl_ts)
 
 # limiting the series to the window 1400 ... 1800 (start chosen because of very low
 # sample depth before that year)
-
 rwl_ts_window <- window(rwl_ts_stab,start=c(1400),end=c(1800))
+t <- seq(1,length(rwl_ts_window))
 plotc(rwl_ts_window)
 
+
+
+#*************************************
+# First approach: Box-Cox transform and differencing at lag 1
+# time
+
+
+# Box-Cox-Transform:
+lambdas <- boxcox(rwl_ts_window~t)
+l <- lambdas$x[which.max(lambdas$y)] # this is the MLE lambda to transform data
+
+rwl_ts_window_boxcox <- (rwl_ts_window^l-1)/l # Box-Cox transformation
+
+# differencing:
+rwl_ts_window_boxcox_diff <- diff(rwl_ts_window_boxcox)
+plotc(rwl_ts_window_boxcox_diff)
+
+
+acf(rwl_ts_window_boxcox_diff)
+pacf(rwl_ts_window_boxcox_diff)
+
+
+
+#******************************************
+# Second approach: Log transform, polynomials
 rwl_ts_window_log <- log(rwl_ts_window)
 plotc(rwl_ts_window_log)
 
@@ -116,8 +150,6 @@ summary(m)
 m2 <- lm(rwl_ts_window_log ~ t+t2)
 summary(m2)
 # Nope, order 1 seems okay.
-
-plotc(m$residuals)
 
 
 acf(m$residuals) # looks exponential now.
