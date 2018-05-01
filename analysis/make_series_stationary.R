@@ -4,7 +4,8 @@ library(ggplot2)
 library(tidyr)
 library(dplR)
 library(forecast)
-
+library(imputeTS)
+library(dlm)
 
 spruce_window <- window(spruce_sup_900_ts,start=1400, end=1800)
 t <- 1400:1800
@@ -125,8 +126,6 @@ pplot + geom_line(aes(y=Values, group=Est_Mean_Method, color=factor(Est_Mean_Met
 # Residual time series
 ########################
 
-# Residual time series
-# --------------------
 m1_res <- spruce_window - m1_fitted
 m2_res <- spruce_window - m2_fitted
 
@@ -157,6 +156,7 @@ pplot + geom_line(aes(y=values, group=y, color=factor(y, labels=c("Warren (1980)
 ##########################
 
 # Proposed transformation in Wollons and Norton (1990) for both methods
+# ---------------------------------------------------------------------
 m1_i <- m1_res/m1_fitted # Warren (1980)
 m2_i <- m2$residuals/m2$fitted.values # Polynomial of order 2
 
@@ -182,12 +182,155 @@ pplot + geom_line(aes(y=values, group=y, color=factor(y, labels=c("Warren (1980)
 
 
 # Acf and Pacf
-################
-
 # For the acf and pacf plots the transformed residuals calculated with the method of Warren (1980) 
 # are used.
 ggAcf(m1_i, main="ACF plot of the transformed residuals after having detrended the series with the method \n of Warren (1980)") # bold font does not work
 ggPacf(m1_i, main="PACF plot of the transformed residuals after having detrended the series with the method \n of Warren (1980)")
 
 
+# Power transformation of the residuals (by hand)
+# -----------------------------------------------
+eps <- 1/10000 # To prevent log from getting -inf
+R <- spruce_window
+local_mean <- (R[1:(length(R)-1)] + R[2:length(R)])/2
+local_sd <- abs(diff(R)) + eps
 
+log_local_mean <- log(local_mean)
+log_local_sd <- log(local_sd)
+
+powt_df <- as.data.frame(cbind(log_S=log_local_sd, log_M=log_local_mean))
+str(powt_df)
+
+# linear model
+m <- lm(log_S ~ log_M, data=powt_df)
+summary(m)
+
+# Coefficients:
+#   Estimate Std. Error t value Pr(>|t|)    
+# (Intercept)  -8.2373     2.5306  -3.255  0.00123 ** 
+#   log_M         2.0442     0.5055   4.044 6.31e-05 ***
+#   ---
+#   Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+b <- m$coef[2]
+
+R_transformed <- R^(1-b)
+
+plot(y=R_transformed, x=1:length(R_transformed), type="l")
+
+# Time series still has a trend
+R_transformed_df <- data.frame(Width_trans=R_transformed, Time=t)
+m <- lm(Width_trans~., data=R_transformed_df)
+summary(m)
+# Coefficients:
+#   Estimate Std. Error t value Pr(>|t|)    
+# (Intercept) -6.083e-03  5.579e-04  -10.90   <2e-16 ***
+#   Time         7.260e-06  3.478e-07   20.88   <2e-16 ***
+#   ---
+#   Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+# 
+# Residual standard error: 0.0008062 on 399 degrees of freedom
+# Multiple R-squared:  0.522,	Adjusted R-squared:  0.5208 
+# F-statistic: 435.7 on 1 and 399 DF,  p-value: < 2.2e-16
+
+R_transformed_demeaned <- m$residuals
+# plot(y=R_transformed_demeaned, x=1:length(R_transformed_demeaned), type="l")
+# 
+# acf(R_transformed_demeaned)
+# pacf(R_transformed_demeaned) # => AR(2)
+
+arima(x=R_transformed_demeaned, c(1,0,0), method="ML")
+# Coefficients:
+#   ar1  intercept
+# 0.6255      0e+00
+# s.e.  0.0393      1e-04
+# 
+# sigma^2 estimated as 3.967e-07:  log likelihood = 2386.12,  aic = -4766.25
+
+# ggplot
+# transformed time series
+R_transformed
+d_ggplot_5 <- cbind(Time=t, y1=R_transformed, y2=R_transformed_demeaned)
+d_ggplot_5 <- as.data.frame(d_ggplot_5)
+str(d_ggplot_5)
+
+d_ggplot_5_gathered <- d_ggplot_5 %>% gather(y, Values, y1:y2)
+
+pplot <- ggplot(d_ggplot_5_gathered, aes(x=Time))
+pplot + geom_line(aes(y=Values, group=y, color=factor(y, labels=c("After power transformation", "After power transformation and linear trend")))) +
+  scale_color_manual(values=c("blue", "green")) +
+  ggtitle('Residual time series')  +
+  theme(plot.title = element_text(hjust=0.5), legend.position = "top") + 
+  xlab("Time") + ylab("Tree ring width (mm)") +
+  labs(color = "Methods") +
+  labs(linetype="Methods")
+        
+ggAcf(R_transformed_demeaned, main="ACF plot after a power transformation and subtracting a linear trend")  
+ggPacf(R_transformed_demeaned, main="PACF plot after a power transformation and subtracting a linear trend")
+
+# Missing values
+################
+R_transformed_demeaned_nas <- R_transformed_demeaned 
+
+# Create missing values
+R_transformed_demeaned_nas[120:150] <- NA
+
+# imputTS package
+smoothed_values_imputeTS <- na.kalman(x=R_transformed_demeaned_nas, model="auto.arima")
+
+plot(y=R_transformed_demeaned, x=1:length(R_transformed_demeaned), type="l")
+lines(y=y, x=1:length(R_transformed_demeaned), col="blue")
+
+# dlm model
+acf(R_transformed_demeaned_nas, na.action=na.pass)
+pacf(R_transformed_demeaned_nas, na.action=na.pass) # => AR(2), with coeff
+
+# AR(2) in state space form (https://robjhyndman.com/talks/ABS3.pdf):
+# Let x_t = [y_t, y_t-1]^T, and w_t = [e_t,0]
+# y_t = [1 0]x_t + v_t
+# x_t = |phi_1 phi_2| x_{t-1} + w_t
+#       |1        0 |
+
+# In notation of the dlm package:
+# FF = [1 0]
+# GG = |phi_1 phi_2|
+#      |1      0   |   
+# An R Package for Dynamic Linear Models, p.9
+# parameters x:
+# x[1] = phi_1
+# x[2] = phi_2
+# x[3] = sqrt(var(v_t))
+# x[4] = sqrt(var(w_t))
+
+build <- function(x){
+  #x <- c(0.6, 0.25, 0.01, 0.01, 0.03)
+  FF <- matrix(c(1,0), nrow=1)
+  GG <- matrix(c(x[1], x[2], 1, 0), byrow=T, nrow=2)
+  V = matrix(x[3]^2,nrow=1)
+  W = crossprod(diag(c(x[4], x[5])))
+  
+  mod <- dlm(FF=FF, GG=GG, V=V, W=W, m0=matrix(c(0,0), ncol=1), C0=diag(c(10^7, 10^7)))
+  return(mod)
+}
+
+# This gives almost the same as na.kalman
+initial_params <- c(0.6, 0.25, 0.01, 0.01, 0.05) # maybe we have to come up with better initial values for the standard deviations
+build(initial_params)
+
+y <- as.numeric(R_transformed_demeaned_nas)
+str(y)
+
+fit2 <- dlmMLE(y, parm=initial_params, build=build, control = list(maxit = 10000))
+fit2$par # 0.60 0.25 0.01 0.01 0.01
+# [1]  5.998274e-01  2.402065e-01 -3.767355e-05  2.182666e-04 -2.531772e-03
+
+str(fit2)
+
+#filtered_values <- dlmFilter(R_transformed_demeaned_nas, build(fit2$par))$f
+smoothed_states <- dlmSmooth(R_transformed_demeaned_nas, build(fit2$par))$s
+
+smoothed_values <- t(matrix(c(1,0), nrow=1) %*% t(smoothed_states))
+
+# Visual verification
+plot(y=R_transformed_demeaned, x=1:length(R_transformed_demeaned), type="l")
+lines(y=smoothed_values[-1], x=1:length(R_transformed_demeaned), col="red")
+lines(y=smoothed_values_imputeTS, x=1:length(R_transformed_demeaned), col="blue", lty=2)
