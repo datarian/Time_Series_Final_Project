@@ -162,3 +162,9 @@ weight_function <- function(x){
     1 - ((ncol(rwl_df)-n)/ncol(rwl_df))
 }
 weight_rwl <- apply(rwl_df, 1, weight_function)
+
+
+#******************************************
+# Third approach: power transformation (https://rdrr.io/cran/dplR/man/powt.html) 
+# Same as in 'make_series_stationary.R'
+# to do
