@@ -21,6 +21,7 @@ rm(file_contents) # Free up memory
 # Extract the sample numbers and their corresponding dated year
 chronology <- as.data.frame(parsed[[1]][,-1],stringsAsFactors = F)
 rm(parsed) # Free up memory
+
 chron_numbers <- as.numeric(chronology[,1])
 chron_years <- as.numeric(chronology[,2])
 
@@ -43,20 +44,23 @@ for (i in 1:nrow(chronology)) {
 
 # construct the sequence of years spanning the data. For the oldest year, we need
 # the minimum of dated year - age of tree
-oldest <- 10000 # initialize with a ridiculously high number
+oldest <- +Inf # initialize with a ridiculously high number
 for(i in 1:length(chron_years)){
     currentsample <- chron_years[i]-(length(chron_rings[[i]])-1)
     oldest <- ifelse(currentsample < oldest, currentsample, oldest)
 }
-
 newest <- max(chron_years)
 year <- seq(oldest,newest,by=1)
 
-# Result dataframe. Structure: First column is the year, subsequent columns
-# represent one sample each, colname is the sample number. Years without
-# tree ring widhts are coded as NA
-rwl_df <- as.data.frame(year); rownames(rwl_df) <- year
 
+# Result dataframe. Structure: Columns represent one sample each,
+# colname is the sample number. Years without tree ring widhts are coded as NA.
+# Rownames are the years for which we have data.
+
+rwl_df <- data.frame(row.names = year)
+
+# iterate over the individual sample chronologies, fill space before and after
+# with NA, append to rwl_df
 for(i in 1:length(chron_numbers)){
     datedyear <- chron_years[i]
     fillbefore <- numeric()
@@ -73,20 +77,19 @@ for(i in 1:length(chron_numbers)){
     rwl_df <- cbind(rwl_df,series)
 }
 
-# remove year column:
-rwl_df <- rwl_df[,-1]
+saveRDS(rwl_df,file="data/rwl_900+.Rds")
+
 
 # Some prior analysis:
 dplR::rwl.report(rwl_df)
 dplR::summary.rwl(rwl_df)
 
 
-rwi <- dplR::detrend(rwl_df,make.plot = F)
+rwi <- dplR::detrend(rwl_df,make.plot = F, method="Mean")
 # plot the obtained chronology. A nice feature is the information on the sample
 # depth!
 rwi.crn <- dplR::chron(rwi)
 plot(rwi.crn,add.spline=T,nyrs=20)
-
 
 
 #*******************************************************************************
