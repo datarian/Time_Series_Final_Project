@@ -1,8 +1,9 @@
 #### Individual series
 # This script parses the raw data file 900+.txt and builds a dataframe in 'rwl'
 # format, a standard for dendrochronological data.
-# It also computes the mean value chronology and does som preliminary analysis
-# of the data.
+# It also computes the mean value chronology and does some preliminary analysis
+# of the data for process identification.
+
 
 library(readtext)
 library(stringr)
@@ -80,7 +81,7 @@ dplR::rwl.report(rwl_df)
 dplR::summary.rwl(rwl_df)
 
 
-rwi <- dplR::detrend(rwl_df,make.plot = F,method = "Mean")
+rwi <- dplR::detrend(rwl_df,make.plot = F)
 # plot the obtained chronology. A nice feature is the information on the sample
 # depth!
 rwi.crn <- dplR::chron(rwi)
@@ -100,12 +101,11 @@ depth <- function(x){
 
 depth_rwl <- apply(rwl_df,1,depth)
 
-
 # Creating initial ts
 rwl_ts <- ts(mean_rwl,end=2017)
 rwl_ts_stab <- rwl_ts/sd_rwl
 plotc(rwl_ts)
-
+plotc(rwl_ts_stab)
 
 # limiting the series to the window 1400 ... 1800 (start chosen because of very low
 # sample depth before that year)
@@ -114,30 +114,36 @@ t <- seq(1,length(rwl_ts_window))
 plotc(rwl_ts_window)
 
 
+#*******************************************************************************
+# First approach: Differencing at lag 1
 
-#*************************************
-# First approach: Box-Cox transform and differencing at lag 1
-# time
+rwl_ts_window_diff <- diff(rwl_ts_window)
+plotc(rwl_ts_window_diff)
+acf(rwl_ts_window_diff)
+pacf(rwl_ts_window_diff)
 
+
+#*******************************************************************************
+# Second approach: Box-Cox transform and differencing at lag 1
 
 # Box-Cox-Transform:
 lambdas <- boxcox(rwl_ts_window~t)
 l <- lambdas$x[which.max(lambdas$y)] # this is the MLE lambda to transform data
 
 rwl_ts_window_boxcox <- (rwl_ts_window^l-1)/l # Box-Cox transformation
+plotc(rwl_ts_window_boxcox)
 
 # differencing:
 rwl_ts_window_boxcox_diff <- diff(rwl_ts_window_boxcox)
 plotc(rwl_ts_window_boxcox_diff)
-
 
 acf(rwl_ts_window_boxcox_diff)
 pacf(rwl_ts_window_boxcox_diff)
 
 
 
-#******************************************
-# Second approach: Log transform, polynomials
+#*******************************************************************************
+# Third approach: Log transform, polynomials
 rwl_ts_window_log <- log(rwl_ts_window)
 plotc(rwl_ts_window_log)
 
@@ -150,15 +156,24 @@ summary(m)
 m2 <- lm(rwl_ts_window_log ~ t+t2)
 summary(m2)
 # Nope, order 1 seems okay.
+plotc(m$residuals)
 
+
+depth_ts <- ts(depth_rwl,end=2017)
+depth_ts_window <- window(depth_ts,start=1400,end=1800)
 
 acf(m$residuals) # looks exponential now.
 pacf(m$residuals)
 
 
+#*******************************************************************************
 # Maybe another approach? -> Weighing by sample depth?
 weight_function <- function(x){
     n <- sum(!is.na(x))
     1 - ((ncol(rwl_df)-n)/ncol(rwl_df))
 }
 weight_rwl <- apply(rwl_df, 1, weight_function)
+
+m3 <- lm(rwl_ts_window_log ~t+depth_ts_window)
+summary(m3)
+plotc(m3$residuals)
