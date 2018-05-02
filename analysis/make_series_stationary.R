@@ -20,8 +20,10 @@ rwl_depth <- apply(rwl_df, 1, depth_function)
 rwl_ts <- ts(rwl_mean,end=2017)
 
 rwl_mean_ts <- ts(rwl_mean,end=2017)
-rwl_sd_ts <- ts(rwl_mean,end=2017)
-rwl_depth_ts <- ts(rwl_mean,end=2017)
+rwl_sd_ts <- ts(rwl_sd,end=2017)
+rwl_depth_ts <- ts(rwl_depth,end=2017)
+
+#
 
 spruce_window <- window(rwl_ts,start=1400, end=1800)
 rwl_depth_window <- window(rwl_depth_ts,start=1400, end=1800)
@@ -33,10 +35,19 @@ t <- 1400:1800
 # New Zealand Journal of Ecology (1990) 13: 9-15 (https://newzealandecology.org/nzje/1872)
 
 
+# Approaches 1 + 2 are derived from literature
+# Approaches 3 + 4 are more "intuitive".
+
+# Approach 4 is the only one which displays exponential decrease of the ACF.
+
+
+# We don't know which approach would be the way to go forward. -> Matthieu?
 
 
 ################################################################################
+################################################################################
 # Making series stationary: First approach
+################################################################################
 ################################################################################
 
 
@@ -195,14 +206,10 @@ pplot + geom_line(aes(y=y)) +
     xlab("Time") + ylab("Tree ring width (1/100 mm)")
 
 
-
-
-
-
-
-
+################################################################################
 ################################################################################
 # Second Approach: Power transformation of the residuals (by hand)
+################################################################################
 ################################################################################
 
 eps <- 1/10000 # To prevent log from getting -inf
@@ -260,9 +267,10 @@ ggAcf(R_transformed_demeaned, main="ACF plot after a power transformation and su
 ggPacf(R_transformed_demeaned, main="PACF plot after a power transformation and subtracting a linear trend")
 
 ################################################################################
-# Third approach: Box-Cox transformation + diff at lag 1
 ################################################################################
-# Second approach: Box-Cox transform and differencing at lag 1
+# Third approach: Box-Cox transformation
+################################################################################
+################################################################################
 
 # Box-Cox-Transform:
 lambdas <- boxcox(spruce_window~t)
@@ -274,10 +282,25 @@ plotc(spruce_window_boxcox)
 acf(spruce_window_boxcox)
 pacf(spruce_window_boxcox)
 
-# differencing:
-spruce_window_boxcox_diff <- diff(rwl_ts_window_boxcox)
-plotc(spruce_window_boxcox_diff)
 
-acf(spruce_window_boxcox_diff)
-pacf(spruce_window_boxcox_diff)
+################################################################################
+################################################################################
+# Fourth approach: Log transform, polynomials
+################################################################################
+################################################################################
 
+spruce_window_stab <- spruce_window/rwl_sd_window
+spruce_window_log <- log(spruce_window_stab)
+
+t2 <- t^2
+
+m <- lm(spruce_window_log ~ t)
+summary(m)
+
+m2 <- lm(spruce_window_log ~ t+t2)
+summary(m2)
+# Nope, order 1 seems okay.
+plotc(m$residuals)
+
+acf(m$residuals) # looks exponential
+pacf(m$residuals)
