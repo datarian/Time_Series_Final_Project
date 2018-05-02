@@ -177,3 +177,8 @@ weight_rwl <- apply(rwl_df, 1, weight_function)
 m3 <- lm(rwl_ts_window_log ~t+depth_ts_window)
 summary(m3)
 plotc(m3$residuals)
+
+#******************************************
+# Third approach: power transformation (https://rdrr.io/cran/dplR/man/powt.html)
+# Same as in 'make_series_stationary.R'
+# to do
