@@ -9,22 +9,24 @@ library(dlm)
 
 #spruce_window <- window(spruce_sup_900_ts,start=1400, end=1800)
 raw_rwl <- readRDS("data/rwl_900+.Rds")
-rwl_mean <- apply(raw_rwl,1,mean,na.rm=T)
-rwl_sd <- apply(raw_rwl,1,sd,na.rm=T)
-rwl_ts <- ts(rwl_mean,end=2017)
+
 depth_function <- function(x){
     sum(!is.na(x))
 }
+rwl_mean <- apply(raw_rwl,1,mean,na.rm=T)
+rwl_sd <- apply(raw_rwl,1,sd,na.rm=T)
 rwl_depth <- apply(rwl_df, 1, depth_function)
+
+rwl_ts <- ts(rwl_mean,end=2017)
+
 rwl_mean_ts <- ts(rwl_mean,end=2017)
 rwl_sd_ts <- ts(rwl_mean,end=2017)
 rwl_depth_ts <- ts(rwl_mean,end=2017)
 
+spruce_window <- window(rwl_ts,start=1400, end=1800)
 rwl_depth_window <- window(rwl_depth_ts,start=1400, end=1800)
 rwl_mean_window <- window(rwl_mean_ts,start=1400, end=1800)
 rwl_sd_window <- window(rwl_sd_ts,start=1400, end=1800)
-
-spruce_window <- window(rwl_ts,start=1400, end=1800)
 t <- 1400:1800
 
 # Literature
