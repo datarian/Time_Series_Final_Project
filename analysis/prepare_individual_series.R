@@ -101,7 +101,6 @@ sd_rwl <- apply(rwl_df,1,sd,na.rm=T)
 depth <- function(x){
     sum(!is.na(x))
 }
-
 depth_rwl <- apply(rwl_df,1,depth)
 
 # Creating initial ts

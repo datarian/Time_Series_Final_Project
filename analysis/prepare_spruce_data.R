@@ -17,8 +17,17 @@ for (i in 1:nrow(ssup9)) {
 series_spruce_sup900 <- c(series_spruce_sup900,as.integer(ssup9l))
 spruce_sup_900_ts <- ts(series_spruce_sup900, start=1332)
 
+spruce_window <- window(spruce_sup_900_ts,start=1400,end=1800)
 
 plot(spruce_sup_900_ts,
      main="Spruce, > 900 m",
      ylab="tree ring width [1/100 mm]",
      xlab="year")
+
+rwl <- readRDS("data/rwl_900+.Rds")
+
+rwl_mean <- apply(rwl,1,mean,na.rm=T)
+rwl_mean_ts <- ts(rwl_mean,end=2017)
+rwl_window <- window(rwl_mean_ts,start=1400,end=1800)
+
+plot(spruce_window)
