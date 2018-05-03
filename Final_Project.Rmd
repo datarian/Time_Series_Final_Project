@@ -32,6 +32,21 @@ knitr::opts_chunk$set(error=TRUE,
 knitr::opts_knit$set(eval.after='fig.cap')
 ```
 
+```{r dataprep, results='hide',echo=FALSE}
+library(itsmr)
+library(dplyr)
+op <- par(no.readonly = F)
+
+rwl <- readRDS("data/rwl_900+.Rds")
+rwl_mean <- apply(rwl, 1, mean, na.rm=T)
+rwl_sd <- apply(rwl,1,sd,na.rm=T)
+depthfun <- function(x) sum(!is.na(x))
+rwl_depth <- apply(rwl,1,depthfun)
+time <- seq(1332,2017,1)
+
+rwl_mean_ts <- ts(rwl_mean,end=2017)
+```
+
 # Abstract
 words words words
 
@@ -43,7 +58,7 @@ Newly measured artifacts are matched to existing, dated chronologies serving the
 
 ## Timeseries used
 
-The chronology used for this project has been compiled from individual measurements of buildings in the Bernese Oberland which are all located above 900 meters. Typically, the wooden structure of old buildings is sampled by boring the beams. The drilling core is then analyzed by microscoping, recording the sequence of tree ring widths. Spruce was a common building material and there is a wealth of houses supplying data. The data can be assumed to originate almost entirely from trees that grew above 900 meters since trees were rarely transported uphill. The data has been supplied by the archaeological service of the canton Berne [@dendroBern] through a personal contact at the dendrology laboratory in Sutz, BE.
+The chronology used for this project has been compiled from 234 individual measurements of buildings in the Bernese Oberland which are all located above 900 meters. Typically, the wooden structure of old buildings is sampled by boring the beams. The drilling core is then analyzed by microscoping, recording the sequence of tree ring widths. Spruce was a common building material and there is a wealth of houses supplying data. The data can be assumed to originate almost entirely from trees that grew above 900 meters since trees were rarely transported uphill. The data has been supplied by the archaeological service of the canton Berne [@dendroBern] through a personal contact at the dendrology laboratory in Sutz, BE.
 
 ## Timeseries analysis applied to dendrochronologies
 
@@ -56,10 +71,27 @@ The chronology used for this project has been compiled from individual measureme
 # Methods
 
 ## Data
-The chronology spans the years from 1332 to 2017 (685 years). The supplier of the data recommended to ignore data after 1800 due to an insufficient amount of data for these years.
+The dataset ${RWL}$ comprises measurements of $N=234$ tree ring sequences originating from the Bernese Oberland. The individual sequences are dated (the most recent ring has a year associated to it), which allows to give the timespan from oldest tree to most recent tree as 1332 to 2017. The length is therefore $T=686$ years.
 
-The predictor represents the yearly mean tree ring width of all the individual measurements with data for a given year. The unit is `mm`.
+Let $S_t$ the set ${y_{ti}, i=1,...N}$ of ring width measurements for fixed year $t$.
 
+Let $n_t = |S_t| = \sum^N_{i=1} \mathds{1}{y_{ti} \neq NA}$, the cardinality for a fixed year $t$.
+
+Let $\bar{y_t} = \frac{1}{n_t}\sum^N_{i=1}y_{ti}*\mathds{1}{y_i \neq NA}$, the mean ring width for a fixed year $t$.
+
+Let ${sd}_t = \sqrt{\frac{1}{n_t-1}\sum^N_{i=1}(y_i-x_t)^2*\mathds{1}{y_i \neq NA}}$, the sample standard deviation for year $t$.
+
+The predictor $Y$ represents the set $\{\bar{y_t}, t=1,...,T\}$ of yearly mean tree ring width of all the individual trees with data for a given year. The unit is `1/100 mm`.
+
+```{r datacharacteristics, fig.cap="Cardinality (left), mean ring width (center) and SD (right) per year", out.width = "\\linewidth"}
+par(mfrow=c(1,3))
+plot(rwl_depth~time,type="l",xlab="Year",ylab="Sample depth [#]")
+plot(rwl_mean~time,type="l" ,xlab="Year",ylab="Mean ringwidth [1/100 mm]")
+plot(rwl_sd~time,type="l",xlab="Year",ylab="SD [1/100 mm]")
+par(op)
+```
+
+The supplier of the data recommended to ignore data after 1800 due to insufficient quality of data for these years, with a prevalence of young trees distorting $\bar{y_t}$ in that time range. Additionally, it was decided to discard data before 1400 because of a very small sample depth in years before 1400. The analysis has therefore been conducted with the set ${y_t, t \in [1400;1800]}$.
 
 ## Fitting -> David
 
