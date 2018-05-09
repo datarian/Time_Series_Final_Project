@@ -1,0 +1,14 @@
+# Results & Discussion
+
+## Achieving stationarity
+
+
+
+
+## Imputation -> Florian
+
+- Introduce missing values
+
+- imputation using different strategies
+
+- discussion of imputation results
