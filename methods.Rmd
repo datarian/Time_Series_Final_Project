@@ -5,29 +5,28 @@ The dataset used as well as the methods employed are detailed.
 ## Data
 The dataset ${rwl}$ comprises measurements of $N=234$ tree ring sequences originating from the Bernese Oberland. The individual sequences are dated (the most recent ring has a year associated to it), which allows to give the timespan from oldest tree (first ring measured )to most recent tree as 1332 to 2017. The length of the series is therefore $T=686$ years.
 
-Let $R_t$ the set ${r_{ti}, i=1,...N}$ of ring width measurements for fixed year $t, t \in [1332,2017]$.
+Let $R_t = {r_{ti}, i=1,...N}$ of ring width measurements for fixed year $t, t \in [1332,2017]$.
 
-Let $n_t = |R_t| = \sum^N_{i=1} \mathds{1}{y_{ti} \neq NA}$, the cardinality for a fixed year $t$, also denoted the *sample depth*.
+Let $n_t = |R_t| = \sum^N_{i=1} \mathds{1}_{(y_{ti} \neq \text{NA})}$, the cardinality for a fixed year $t$, also denoted the *sample depth*.
 
-Let $\bar{r_t} = \frac{1}{n_t}\sum^N_{i=1}r_{ti}*\mathds{1}{r_i \neq NA}$, the mean ring width for a fixed year $t$.
+Let $\bar{r_t} = \frac{1}{n_t}\sum^N_{i=1}r_{ti}*\mathds{1}_{(r_i \neq \text{NA})}$, the mean ring width for a fixed year $t$.
 
-Let ${sd}_t = \sqrt{\frac{1}{n_t-1}\sum^N_{i=1}(y_i-x_t)^2*\mathds{1}{y_i \neq NA}}$, the sample standard deviation for year $t$.
+Let ${sd}_t = \sqrt{\frac{1}{n_t-1}\sum^N_{i=1}(y_i-x_t)^2*\mathds{1}_{(y_i \neq \text{NA})}}$, the sample standard deviation for year $t$.
 
-Let $\{\bar{r_t}, t=1,...,T\}$ the set of yearly mean tree ring widths of all the individual trees with data for a given year. The unit is `1/100 mm`.
+Let $\bar{R}=\{\bar{r_t}, t=1,...,T\}$ the set of yearly mean tree ring widths of all the individual trees with data for a given year. The unit is `1/100 mm`.
 
-```{r datacharacteristics, fig.cap="Cardinality (left), mean ring width (center) and SD (right) per year", out.width = "\\linewidth"}
-par(mfrow=c(1,3))
+```{r datacharacteristics, fig.cap="Cardinality (left) and mean ring width (right)", out.width = "\\linewidth"}
+par(mfrow=c(1,2))
 plot(rwl_depth~time,type="l",xlab="Year",ylab="Sample depth [#]")
 plot(rwl_mean~time,type="l" ,xlab="Year",ylab="Mean ringwidth [1/100 mm]")
-plot(rwl_sd~time,type="l",xlab="Year",ylab="SD [1/100 mm]")
 par(op)
 ```
 
-The supplier of the data recommended to ignore data after 1800 due to insufficient quality of data for these years, with a prevalence of young trees distorting $\bar{r_t}$ in that time range. Additionally, it was decided to discard data before 1400 because of a very small sample depth in years before 1400. The analysis has therefore been conducted with the set ${r_t, t \in [1400;1800]}$.
+The supplier of the data recommended to ignore data after 1800 due to insufficient quality of data for these years, with a prevalence of young trees distorting $\bar{r_t}$ in that time range. Additionally, it was decided to discard data before 1400 because of a very small sample depth in years before 1400. The analysis has therefore been conducted with the set $\bar{R^*} = {r_t, t \in [1400;1800]}$.
 
 ## Stationarity of the time series
 
-In the following section, removal of trend and model fitting will be discussed. As seen in [fig:datacharacteristics], there is no apparent seasonal component present in the data.
+In the following section, removal of trend and model fitting will be discussed. As can be seen in \ref{fig:datacharacteristics}, there is no apparent seasonal component present in the data.
 
 ### Removing trend
 

@@ -4,7 +4,7 @@ Dendrochronology is an archaeological method used for dating artifacts. Chronolo
 
 Newly measured artifacts are matched to existing, dated chronologies serving the double purpose of strengthening the chronology and dating the artifact in question.
 
-## Timeseries used
+## Dating buildings through dendrochronology
 
 The chronology used for this project has been compiled from 234 individual measurements of buildings in the Bernese Oberland which are all located above 900 meters. Typically, the wooden structure of old buildings is sampled by boring the beams. The drilling core is then analyzed by microscoping, recording the sequence of tree ring widths. Spruce was a common building material and there is a wealth of houses supplying data. The data can be assumed to originate almost entirely from trees that grew above 900 meters since trees were rarely transported uphill. The data has been supplied by the archaeological service of the canton Berne [@dendroBern] through a personal contact at the dendrology laboratory in Sutz, BE.
 

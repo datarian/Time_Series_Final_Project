@@ -6,6 +6,7 @@ library(dplR)
 library(forecast)
 library(imputeTS)
 library(dlm)
+library(itsmr)
 
 #spruce_window <- window(spruce_sup_900_ts,start=1400, end=1800)
 raw_rwl <- readRDS("data/rwl_900+.Rds")
@@ -30,6 +31,8 @@ rwl_depth_window <- window(rwl_depth_ts,start=1400, end=1800)
 rwl_mean_window <- window(rwl_mean_ts,start=1400, end=1800)
 rwl_sd_window <- window(rwl_sd_ts,start=1400, end=1800)
 t <- 1400:1800
+
+data_to_plot <- as.data.frame(cbind(Time=t, ringwidth=spruce_window,model=rep("Observed",times=length(t))))
 
 # Literature
 # New Zealand Journal of Ecology (1990) 13: 9-15 (https://newzealandecology.org/nzje/1872)
@@ -73,12 +76,14 @@ m1 <- lm(log_spruce_window~log_t+t, data=d1)
 summary(m1)
 
 # Fitted values
-m1_fitted<- exp(m1$fitted.values)
+app_1_trend_1_fit<- exp(m1$fitted.values)
 
 # ggplot
-d_ggplot_1 <- cbind(Time=t, y1=spruce_window, y2=m1_fitted)
+d_ggplot_1 <- cbind(Time=t, y1=spruce_window, y2=app_1_trend_1_fit)
 d_ggplot_1 <- as.data.frame(d_ggplot_1)
-str(d_ggplot_1)
+
+
+
 pplot <- ggplot(d_ggplot_1, aes(x=Time))
 pplot + geom_line(aes(y=y1), color="blue") +
     geom_line(aes(y=y2), color="black") +
@@ -99,13 +104,15 @@ head(d2)
 m2 <- lm(y ~ t+t2,data=d2)
 summary(m2)
 
-m2_fitted <- m2$fitted.values
+app_1_trend_2_fit <- m2$fitted.values
 
 # ggplot
-d_ggplot_2 <- cbind(Time=t, y1=spruce_window, y2=m1_fitted, y3=m2_fitted)
+d_ggplot_2 <- cbind(Time=t, y1=spruce_window, y2=app_1_trend_1_fit, y3=app_1_trend_2_fit)
 d_ggplot_2 <- as.data.frame(d_ggplot_2)
+
+data_p_order2 <- as.data.frame(cbind(Time=t, y=app_1_trend_2_fit,model=rep("Trend Polynomial order 2",times=length(t))))
+
 d_ggplot_2_gathered <- d_ggplot_2 %>% gather(y, values, y2:y3)
-tail(d_ggplot_2_gathered)
 colnames(d_ggplot_2_gathered) <- c("Time", "Width", "Est_Mean_Method", "Values")
 str(d_ggplot_2_gathered)
 
@@ -127,8 +134,8 @@ pplot + geom_line(aes(y=Values, group=Est_Mean_Method, color=factor(Est_Mean_Met
 # Residual time series
 #-------------------------------------------------------------------------------
 
-m1_res <- spruce_window - m1_fitted
-m2_res <- spruce_window - m2_fitted
+m1_res <- spruce_window - app_1_trend_1_fit
+m2_res <- spruce_window - app_1_trend_2_fit
 
 # ggplot
 d_ggplot_3 <- cbind(Time=t, y1=m1_res, y2=m2_res)
@@ -159,9 +166,12 @@ pplot + geom_line(aes(y=values, group=y, color=factor(y, labels=c("Warren (1980)
 # Method 1: Proposed transformation in Wollons and Norton (1990) for both methods
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-m1_i <- m1_res/m1_fitted # Warren (1980)
+m1_i <- m1_res/app_1_trend_1_fit # Warren (1980)
 m2_i <- m2$residuals/m2$fitted.values # Polynomial of order 2
 
+temp <- cbind(Time=t, y=m1_i,model=rep("Woollons",times=length(t)))
+data_woollons <- as.data.frame(cbind(Time=t, y=m1_i,model=rep("Woollons",times=length(t))))
+data_p_order2 <- as.data.frame(cbind(Time=t, y=m2_i,model=rep("Polynomial order 2",times=length(t))))
 
 # ggplot
 d_ggplot_4 <- cbind(Time=t, y1=m1_i, y2=m2_i)
@@ -193,11 +203,15 @@ ggPacf(m1_i, main="PACF plot of the transformed residuals after having detrended
 # Stabilisation: (sample mean - \mu)/sd(sample mean)
 # \mu was estimated using Woollons and Norton
 
-stab_sd_ts <- (rwl_mean_window - m1_fitted)/(sqrt(rwl_depth_window)^(-1)*rwl_sd_window)
-plot(method1_ts)
+stab_sd_ts <- (rwl_mean_window - app_1_trend_1_fit)/(sqrt(rwl_depth_window)^(-1)*rwl_sd_window)
+plot(stab_sd_ts)
 
 d_ggplot_5 <- cbind(Time=t, y=stab_sd_ts)
 d_ggplot_5 <- as.data.frame(d_ggplot_5)
+
+data_woollons_sd_stab <- as.data.frame(cbind(Time=t, y=stab_sd_ts,model=rep("Woollons SD stab.",times=length(t))))
+data_woollons_sd_stab$Time <- as.numeric(levels(data_woollons_sd_stab$Time)[data_woollons_sd_stab$Time])
+data_woollons_sd_stab$y <- as.numeric(levels(data_woollons_sd_stab$y)[data_woollons_sd_stab$y])
 
 pplot <- ggplot(d_ggplot_5, aes(x=Time))
 pplot + geom_line(aes(y=y)) +
@@ -230,6 +244,8 @@ summary(m)
 b <- m$coef[2]
 
 R_transformed <- R^(1-b)
+data_powertrans <- as.data.frame(cbind(Time=t, y=R_transformed,model=rep("Power transformed",times=length(t))))
+
 
 plot(y=R_transformed, x=1:length(R_transformed), type="l")
 
@@ -238,17 +254,19 @@ R_transformed_df <- data.frame(Width_trans=R_transformed, Time=t)
 m <- lm(Width_trans~., data=R_transformed_df)
 summary(m)
 
-R_transformed_demeaned <- m$residuals
+R_transformed_centered <- m$residuals
 
-acf(R_transformed_demeaned)
-pacf(R_transformed_demeaned) # => AR(2)
+data_powertrans_centered <- as.data.frame(cbind(Time=t, y=R_transformed_centered,model=rep("Power trans. centered",times=length(t))))
 
-arima(x=R_transformed_demeaned, c(2,0,0), method="ML")
+acf(R_transformed_centered)
+pacf(R_transformed_centered) # => AR(2)
+
+arima(x=R_transformed_centered, c(2,0,0), method="ML")
 
 # ggplot
 # transformed time series
 R_transformed
-d_ggplot_6<- cbind(Time=t, y1=R_transformed, y2=R_transformed_demeaned)
+d_ggplot_6<- cbind(Time=t, y1=R_transformed, y2=R_transformed_centered)
 d_ggplot_6<- as.data.frame(d_ggplot_6)
 str(d_ggplot_5)
 
@@ -264,8 +282,8 @@ pplot + geom_line(aes(y=Values, group=y,
   labs(color = "Methods") +
   labs(linetype="Methods")
 
-ggAcf(R_transformed_demeaned, main="ACF plot after a power transformation and subtracting a linear trend")
-ggPacf(R_transformed_demeaned, main="PACF plot after a power transformation and subtracting a linear trend")
+ggAcf(R_transformed_centered, main="ACF plot after a power transformation and subtracting a linear trend")
+ggPacf(R_transformed_centered, main="PACF plot after a power transformation and subtracting a linear trend")
 
 ################################################################################
 ################################################################################
@@ -277,8 +295,10 @@ ggPacf(R_transformed_demeaned, main="PACF plot after a power transformation and 
 lambdas <- boxcox(spruce_window~t)
 l <- lambdas$x[which.max(lambdas$y)] # this is the MLE lambda to transform data
 
-spruce_window_boxcox <- (spruce_window^l-1)/l # Box-Cox transformation
+spruce_window_boxcox <- (spruce_window^l-1)/l-mean((spruce_window^l-1)/l) # Box-Cox transformation
 plotc(spruce_window_boxcox)
+
+data_boxcox <- as.data.frame(cbind(Time=t, y=spruce_window_boxcox,model=rep("Box-Cox transform",times=length(t))))
 
 acf(spruce_window_boxcox)
 pacf(spruce_window_boxcox)
@@ -303,7 +323,24 @@ summary(m2)
 # Nope, order 1 seems okay.
 plotc(m$residuals)
 
-acf(m$residuals) # looks exponential
-pacf(m$residuals)
+data_log_order1_varstab <- as.data.frame(cbind(Time=t, y=m$residuals,model=rep("Log trans., order 1",times=length(t))))
 
 
+
+################################################################################
+# Overview plot
+
+data <- rbind(data_powertrans_centered,
+              data_boxcox,
+              data_log_order1_varstab,
+              data_p_order2)
+data$Time <- as.numeric(levels(data$Time)[data$Time])
+data$y <- as.numeric(levels(data$y)[data$y])
+
+stationarity_woollons_plot <- ggplot(data_woollons_sd_stab,aes(x=Time,y=y,colour=model)) +
+    geom_line(size=0.5) +
+    ylab("Ring width [1/100 mm]")
+
+stationarity_comparison_plot <- ggplot(data, aes(x=Time,y=y,colour=model)) +
+    geom_line(size=0.5) +
+    ylab("Ring width [1/100 mm]")

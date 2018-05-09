@@ -2,8 +2,26 @@
 
 ## Achieving stationarity
 
+The approaches yielded very different results, as can be observed in figure  \ref{fig:stationaritycomparison}. The method proposed by [@woollons1990time] had much larger variance and is therefore shown separately in figure \ref{fig:stationaritywoollons}.
 
+```{r stationaritycomparison, fig.cap="Comparison of different methods to achieve a stationary time series."}
+stationarity_comparison_plot
+```
 
+```{r stationaritywoollons, fig.cap="Timeseries tranformed according to [@woollons1990time]"}
+stationarity_woollons_plot
+```
+
+The stationary timeseries labelled "Log trans., order1" in figure \ref{fig:stationaritycomparison} was chosen for further analysis. It's ACF / PACF plots are shown in \ref{fig:acfpacf_chosen}
+The ACF / PACF plots for all approaches except for the variance-stabilized log transform with an order-1 trend indicated either non-stationarity or complex processes.
+
+```{r acfpacf_chosen, fig.cap="ACF (left) and PACF (right) of the chosen stationary time series."}
+
+acf <- ggAcf(data_log_order1_varstab$y, main="") # looks exponential
+pacf <- ggPacf(data_log_order1_varstab$y,main="")
+grid.arrange(acf,pacf,ncol=2)
+
+```
 
 ## Imputation -> Florian
 
