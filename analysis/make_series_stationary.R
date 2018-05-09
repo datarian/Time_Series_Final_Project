@@ -255,7 +255,8 @@ str(d_ggplot_5)
 d_ggplot_5_gathered <- d_ggplot_6%>% gather(y, Values, y1:y2)
 
 pplot <- ggplot(d_ggplot_5_gathered, aes(x=Time))
-pplot + geom_line(aes(y=Values, group=y, color=factor(y, labels=c("After power transformation", "After power transformation and linear trend")))) +
+pplot + geom_line(aes(y=Values, group=y,
+                      color=factor(y, labels=c("After power transformation", "After power transformation and linear trend")))) +
   scale_color_manual(values=c("blue", "green")) +
   ggtitle('Residual time series')  +
   theme(plot.title = element_text(hjust=0.5), legend.position = "top") +
@@ -304,3 +305,5 @@ plotc(m$residuals)
 
 acf(m$residuals) # looks exponential
 pacf(m$residuals)
+
+

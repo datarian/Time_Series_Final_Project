@@ -1,3 +1,8 @@
+# Appendix
+
+## R scripts
+
+```{r prepare_series, eval = F, echo=T}
 #### Individual series
 # This script parses the raw data file 900+.txt and builds a dataframe in 'rwl'
 # format, a standard for dendrochronological data.
@@ -79,8 +84,4 @@ for(i in 1:length(chron_numbers)){
 
 saveRDS(rwl_df,file="data/rwl_900+.Rds")
 
-
-
-
-
-
+```
