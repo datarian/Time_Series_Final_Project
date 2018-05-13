@@ -1,6 +1,6 @@
 library(ggplot2)
 
-ggplot2::theme_set(ggplot2::theme_bw(base_size = 14))
+ggplot2::theme_set(ggplot2::theme_bw(base_size = 10))
 ggplot2::theme_update(
     plot.background = ggplot2::element_rect(colour="white"),
     panel.background = ggplot2::element_rect(colour = "black", fill=NA),
@@ -16,11 +16,10 @@ ggplot2::theme_update(
     strip.text.x = ggplot2::element_text(face="bold"),
     strip.background = ggplot2::element_rect(colour="black", fill="white"),
     legend.key = ggplot2::element_rect(colour="white", size = 0.3),
-    legend.title = ggplot2::element_blank()
+    legend.title = ggplot2::element_blank(),
+    aspect.ratio = 0.618
 )
 
 ggplot2::scale_fill_manual(values=ggthemes::scale_fill_colorblind(8))
 ggplot2::scale_color_manual(values=ggthemes::scale_colour_colorblind(8))
 pal <-ggthemes::colorblind_pal()(8)
-
-op <- par(no.readonly = TRUE)

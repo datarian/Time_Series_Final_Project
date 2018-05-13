@@ -24,7 +24,31 @@ rwl_mean_ts <- ts(rwl_mean,end=2017)
 rwl_sd_ts <- ts(rwl_sd,end=2017)
 rwl_depth_ts <- ts(rwl_depth,end=2017)
 
-#
+year <- seq(start(rwl_ts)[1],end(rwl_ts)[1])
+seriesDepth <- as.data.frame(cbind(year,rwl_depth))
+seriesMean <- as.data.frame(cbind(year,rwl_mean))
+
+seriesDepthPlot <- ggplot(seriesDepth, aes(x=year,y=rwl_depth)) +
+    geom_line() +
+    ylab("Sample depth [#]") +
+    xlab("Time") +
+    theme(aspect.ratio = 0.618)
+
+seriesMeanPlot <- ggplot(seriesMean, aes(x=year,y=rwl_mean)) +
+    geom_line() +
+    ylab("Mean ringwidth [1/100 mm]") +
+    xlab("Time") +
+    theme(aspect.ratio = 0.618)
+
+# Showing off heteroskedasticity
+heterosk <- lm(seriesMean$rwl_mean~seriesMean$year)
+seriesHeterosk <- as.data.frame(cbind(year,heterosk$residuals))
+
+seriesHeteroskedasticityPlot <- ggplot(seriesHeterosk, aes(x=year,y=V2)) +
+    geom_line() +
+    ylab("Residuals [1/100 mm]") +
+    xlab("Time") +
+    theme(aspect.ratio = 0.618)
 
 spruce_window <- window(rwl_ts,start=1400, end=1800)
 rwl_depth_window <- window(rwl_depth_ts,start=1400, end=1800)

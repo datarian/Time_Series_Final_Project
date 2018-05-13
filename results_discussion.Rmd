@@ -1,6 +1,6 @@
 # Results & Discussion
 
-## Achieving stationarity
+## Stationarity
 
 The approaches yielded very different results, as can be observed in figure  \ref{fig:stationaritycomparison}. The method proposed by [@woollons1990time] had much larger variance and is therefore shown separately in figure \ref{fig:stationaritywoollons}.
 
@@ -12,21 +12,27 @@ stationarity_comparison_plot
 stationarity_woollons_plot
 ```
 
-The stationary timeseries labelled "Log trans., order1" in figure \ref{fig:stationaritycomparison} was chosen for further analysis. It's ACF / PACF plots are shown in \ref{fig:acfpacf_chosen}
-The ACF / PACF plots for all approaches except for the variance-stabilized log transform with an order-1 trend indicated either non-stationarity or complex processes.
+The stationary time series labelled "Log trans., order1" in figure \ref{fig:stationaritycomparison} was chosen for further analysis. It's ACF / PACF plots are shown in figure \ref{fig:acfpacf_chosen}. The shape of both ACF and PACF give some basis to argue for either an AR(1) or ARMA(1,1) process.
+
+The ACF / PACF plots for all approaches except for the variance-stabilized log transform with an order-1 trend indicated either non-stationarity or complex processes. These plots are shown in the appendix for reference.
 
 ```{r acfpacf_chosen, fig.cap="ACF (left) and PACF (right) of the chosen stationary time series."}
 
-acf <- ggAcf(data_log_order1_varstab$y, main="") # looks exponential
-pacf <- ggPacf(data_log_order1_varstab$y,main="")
+acf <- ggAcf(data_log_order1_varstab$y, main="") +
+    theme(aspect.ratio = 0.618) # looks exponential
+pacf <- ggPacf(data_log_order1_varstab$y,main="") +
+    theme(aspect.ratio = 0.618) 
 grid.arrange(acf,pacf,ncol=2)
 
 ```
+## Considered processes: ARMA(1,1), AR(1), AR(2)
 
-## Imputation -> Florian
+## Imputation
 
 - Introduce missing values
 
 - imputation using different strategies
 
 - discussion of imputation results
+
+## Exogeneous data

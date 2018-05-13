@@ -1,11 +1,9 @@
-# Methods
-
-The dataset used as well as the methods employed are detailed.
+# Materials and methods
 
 ## Data
-The dataset ${rwl}$ comprises measurements of $N=234$ tree ring sequences originating from the Bernese Oberland. The individual sequences are dated (the most recent ring has a year associated to it), which allows to give the timespan from oldest tree (first ring measured )to most recent tree as 1332 to 2017. The length of the series is therefore $T=686$ years.
+The dataset ${rwl}$ comprises measurements of $N=234$ tree ring sequences originating from the Bernese Oberland. The individual sequences are dated (the most recent ring has a year associated to it), which allows to give the timespan from oldest tree (first ring measured) to most recent tree as 1332 to 2017. The length of the series is therefore $T=686$ years.
 
-Let $R_t = {r_{ti}, i=1,...N}$ of ring width measurements for fixed year $t, t \in [1332,2017]$.
+Let $R_t = \{r_{ti}, i=1,...N\}$ the set of ring width measurements for fixed year $t, t \in [1332,2017]$.
 
 Let $n_t = |R_t| = \sum^N_{i=1} \mathds{1}_{(y_{ti} \neq \text{NA})}$, the cardinality for a fixed year $t$, also denoted the *sample depth*.
 
@@ -15,31 +13,27 @@ Let ${sd}_t = \sqrt{\frac{1}{n_t-1}\sum^N_{i=1}(y_i-x_t)^2*\mathds{1}_{(y_i \neq
 
 Let $\bar{R}=\{\bar{r_t}, t=1,...,T\}$ the set of yearly mean tree ring widths of all the individual trees with data for a given year. The unit is `1/100 mm`.
 
-```{r datacharacteristics, fig.cap="Cardinality (left) and mean ring width (right)", out.width = "\\linewidth"}
-par(mfrow=c(1,2))
-plot(rwl_depth~time,type="l",xlab="Year",ylab="Sample depth [#]")
-plot(rwl_mean~time,type="l" ,xlab="Year",ylab="Mean ringwidth [1/100 mm]")
-par(op)
+```{r originalseries, fig.cap="The timeseries of yearly mean tree ring widths."}
+seriesMeanPlot
+```
+The series of mean tree ring widths is shown in figure \ref{fig:originalseries}. It is obvious that there is no seasonal component in the data.
+```{r datacharacteristics, fig.cap="Cardinality (left) and residuals after linear trend removal (right)",fig.width=7, out.width = "\\linewidth"}
+grid.arrange(seriesDepthPlot,seriesHeteroskedasticityPlot,ncol=2)
 ```
 
-The supplier of the data recommended to ignore data after 1800 due to insufficient quality of data for these years, with a prevalence of young trees distorting $\bar{r_t}$ in that time range. Additionally, it was decided to discard data before 1400 because of a very small sample depth in years before 1400. The analysis has therefore been conducted with the set $\bar{R^*} = {r_t, t \in [1400;1800]}$.
+The supplier of the data recommended to ignore data after 1800 due to insufficient quality of data for these years, with a prevalence of young trees distorting $\bar{r_t}$ in that time range (compare \ref{fig:originalseries}). Additionally, it was decided to discard data before 1400 because of a very small sample depth in years before 1400 (see figure \ref{fig:datacharacteristics}, left) . The analysis has therefore been conducted with the set $\bar{R^*}={r_t, t \in [1400;1800]}$.
 
-## Stationarity of the time series
+## Achieving stationarity of the time series
 
-In the following section, removal of trend and model fitting will be discussed. As can be seen in \ref{fig:datacharacteristics}, there is no apparent seasonal component present in the data.
+In the following section, removal of trend and model fitting will be discussed. The following approaches were analysed:
 
-### Removing trend
+**Power transformation / Box-Cox transform:** These methods are related and aim to stabilize variance in a model-independent manner, i.e. irrespective of the time series process that is deduced from the resulting stationary series. The methods work by finding the transformation index $\lambda$ that minimizes the coefficient of variation of the series [@box1976time]. In short, [@guerrero2004] suggests dividing the time series into $H\geq2$ equal-sized subseries, computing mean $\bar{Z_h}$ and standard deviation $S_h$ for each subseries and then search for $\lambda$ such that $\frac{S_h}{\bar{Z}^{1-\lambda}_h}=c ; h=1,...H$ where $c>0$ is a constant value.
 
-Several approaches were studied to deal with heteroskedasticity and trend removal. These approaches wil be presented and discussed here.
+**Woollons** The method proposes to initially detrend the data by fitting a polynomial, then dividing the residuals by the fitted values  [see @woollons1990time]. To summarise, the proposed approach is an estimate of the form $Y = \alpha*t^{\beta}*e^{\delta*t}$. Taking the log on both sides yields something linear in $ln(t)$.
 
-Overview of the methods considered:
+**Log transformation & linear trend** This approach was considered on intuitive grounds and was inspired by information given in the accompanying lecture. Variance stabilisation was tackled by the transformation $\frac{\bar{r}_t}{sd_t},t=1400,...,1800$, followed by fitting a first-order trend on the log-transformed and variance-stabilized series.
 
-1. **Woollons** Described in [@woollons1990time]. The proposed approach is an estimate of the form $Y = alpha*t^(beta)*exp(delta*t)$. Taking the log on both sides yields something linear in $ln(t)$
-2. **Power tranformation of residuals**
-3. **Box-Cox transform** Tranformation that yields a normally distributed timeseries
-4. **Log transformation, polynomials**
-
-## imputing strategies -> Florian
+## Imputation
 
     - imputeTS: na.kalman -> emphasize this
 
