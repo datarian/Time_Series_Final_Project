@@ -4,6 +4,7 @@ author: "Time Series Analysis"
 date: '`r Sys.Date()`'
 bibliography: final_project.bib
 biblio-style: apsr
+fontsize: 11pt
 output:
     pdf_document:
         toc: true
@@ -13,14 +14,13 @@ output:
             in_header: latex/mystyles.sty
             before_body: latex/before_body.tex
         fig_caption: yes
-        fig_height: 6
         fig_width: 7
         keep_tex: yes
         latex_engine: xelatex
 abstract: "This will be the abstract of our report. It wil be automatically included and this is just very nice."
 ---
 
-```{r setup, include=FALSE}
+```{r setup, include=FALSE,cache.vars="rwl_df"}
 knitr::opts_chunk$set(error=TRUE,
                       warning=FALSE,
                       message=FALSE,
@@ -44,6 +44,8 @@ inline_hook <- function(x) {
   }
 }
 
+options(knitr.table.format = "latex")
+
 # Automatically crop PDF plots
 knitr::knit_hooks$set(
     inline = inline_hook,
@@ -58,6 +60,8 @@ source("analysis/make_series_stationary.R")
 library(itsmr)
 library(dplyr)
 library(gridExtra)
+library(knitr)
+library(kableExtra)
 op <- par(no.readonly = F)
 
 rwl <- readRDS("data/rwl_900+.Rds")
@@ -79,12 +83,10 @@ rwl_mean_ts <- ts(rwl_mean,end=2017)
 ```{r child="results_discussion.Rmd"}
 ```
 
+```{r child="conclusion.Rmd"}
+```
 
-# Conclusion
-
-To be seen
-
-# References
+# References    
 
 <div id="refs"></div>
 

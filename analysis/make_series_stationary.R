@@ -7,6 +7,7 @@ library(forecast)
 library(imputeTS)
 library(dlm)
 library(itsmr)
+library(MASS)
 
 #spruce_window <- window(spruce_sup_900_ts,start=1400, end=1800)
 raw_rwl <- readRDS("data/rwl_900+.Rds")
@@ -285,7 +286,7 @@ data_powertrans_centered <- as.data.frame(cbind(Time=t, y=R_transformed_centered
 acf(R_transformed_centered)
 pacf(R_transformed_centered) # => AR(2)
 
-arima(x=R_transformed_centered, c(2,0,0), method="ML")
+arima(x=R_transformed_centered, c(2,0,0), order=c(0,0,0),method="ML")
 
 # ggplot
 # transformed time series
@@ -368,3 +369,43 @@ stationarity_woollons_plot <- ggplot(data_woollons_sd_stab,aes(x=Time,y=y,colour
 stationarity_comparison_plot <- ggplot(data, aes(x=Time,y=y,colour=model)) +
     geom_line(size=0.5) +
     ylab("Ring width [1/100 mm]")
+
+###############################################################################
+# Model identification
+
+Xt <- m$residuals
+Xt.bar <- mean(Xt)
+Box.test(x=Xt,lag=20,type="Ljung-Box")
+
+
+
+
+Xt.autofit <- autofit(x=Xt,p=1:3,q=0:3) # ARMA(1,1) was found.
+
+Xt.arma11 <- arima(x=Xt,order=c(1,0,1),include.mean = F)
+arma11.phi <- Xt.arma11$model$phi
+arma11.theta <- Xt.arma11$model$theta
+arma11.sigma2 <- Xt.arma11$sigma2
+
+Xt.ar1 <- arima(x=Xt,order=c(1,0,0),include.mean = F)
+ar1.phi <- Xt.ar1$model$phi
+ar1.sigma2 <- Xt.ar1$sigma2
+
+paramnames <- c("$\\phi$","$\\theta$","$\\sigma^2$","$\\phi$","$\\sigma^2$")
+parameters <- c(arma11.phi,arma11.theta,arma11.sigma2,ar1.phi,ar1.sigma2)
+
+se <- c(sqrt(diag(Xt.arma11$var.coef)),"-",sqrt(diag(Xt.ar1$var.coef)),"-")
+
+modelComparisonTable <- data.frame(paramnames,parameters,se)
+colnames(modelComparisonTable) <- c("Parameter name", "Parameter value", "standard error")
+
+
+# Let's look at the residuals of the model
+#plotc(model_used$residuals)
+
+# summary of the diagnostic checking; using the tsdiag function
+#tsdiag(model_used)
+# In addition to the ACF; we can see all Ljung-box tests for all possible lags.
+# The p-value is larger than 5% in each case, meaning that we cannot reject the Hypothesis H0 that
+# these residuals are a white-noise.
+# So that's good. These residuals seem to be indeed a white-noise (good ACF; large pvalues on Ljungbox tests)

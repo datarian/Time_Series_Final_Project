@@ -1,0 +1,7 @@
+# Conclusions
+
+## Stationarity
+
+Furthermore, we investigated how exogeneous data could be employed to achieve a stationary time series. This investigation was done on a separate time series contained in the R-package 'dplR' [@dplR] and using climatic data originating from the U.S. National Oceanographic and Athmosperic Administration.
+
+## Imputation
