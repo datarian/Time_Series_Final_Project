@@ -1,5 +1,7 @@
 # Appendix
 
+## Additional ACF and PACF plots
+
 ## R scripts
 
 ```{r prepare_series, eval = F, echo=T}

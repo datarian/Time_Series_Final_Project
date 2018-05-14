@@ -3,6 +3,7 @@ title: "Dendrochronologies: Dating wooden artifacts"
 author: "Time Series Analysis"
 date: '`r Sys.Date()`'
 bibliography: final_project.bib
+biblio-style: apsr
 output:
     pdf_document:
         toc: true
@@ -16,6 +17,7 @@ output:
         fig_width: 7
         keep_tex: yes
         latex_engine: xelatex
+abstract: "This will be the abstract of our report. It wil be automatically included and this is just very nice."
 ---
 
 ```{r setup, include=FALSE}
@@ -29,13 +31,33 @@ knitr::opts_chunk$set(error=TRUE,
                       fig.asp=0.618,
                       fig.align="center",
                       fig.path = "./figures/",
-                      out.width = "0.7\\linewidth")
+                      out.width = "0.8\\linewidth",
+                      crop = TRUE)
 knitr::opts_knit$set(eval.after='fig.cap')
+
+# Format numbers to two digits
+inline_hook <- function(x) {
+  if (is.numeric(x)) {
+    format(x, digits = 2, big.mark = "'")
+  } else {
+      x
+  }
+}
+
+# Automatically crop PDF plots
+knitr::knit_hooks$set(
+    inline = inline_hook,
+    crop = knitr::hook_pdfcrop)
+
+source("latex/plotDefaults.R")
+source("analysis/prepare_individual_series.R")
+source("analysis/make_series_stationary.R")
 ```
 
 ```{r dataprep, results='hide',echo=FALSE}
 library(itsmr)
 library(dplyr)
+library(gridExtra)
 op <- par(no.readonly = F)
 
 rwl <- readRDS("data/rwl_900+.Rds")
@@ -48,16 +70,13 @@ time <- seq(1332,2017,1)
 rwl_mean_ts <- ts(rwl_mean,end=2017)
 ```
 
-# Abstract
-words words words
-
 ```{r child="introduction.Rmd"}
 ```
 
 ```{r child="methods.Rmd"}
 ```
 
-```{r child="results_discussion.rmd"}
+```{r child="results_discussion.Rmd"}
 ```
 
 
@@ -69,7 +88,7 @@ To be seen
 
 <div id="refs"></div>
 
-\\clearpage
+\clearpage
 
 ```{r child="appendix.Rmd" }
 ```
