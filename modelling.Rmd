@@ -1,6 +1,9 @@
-# Results & Discussion
+# Modelling / Analysis
 
-## Stationarity
+## Transformation
+
+
+## Acieving stationarity
 
 The approaches yielded very different results, as can be observed in figures \ref{fig:stationaritycomparison}. The method proposed by [@woollons1990time] had much larger variance and is therefore shown separately in figure \ref{fig:stationaritywoollons}.
 
@@ -11,6 +14,8 @@ stationarity_comparison_plot
 ```{r stationaritywoollons, fig.cap="Timeseries tranformed according to [@woollons1990time]"}
 stationarity_woollons_plot
 ```
+
+## Model selection
 
 The stationary time series labelled "Log trans., order1" in figure \ref{fig:stationaritycomparison} was chosen for further analysis as it appeared the most stationary (mean: `r Xt.bar`.  It's ACF / PACF plots are shown in figure \ref{fig:acfpacf_chosen}. The shape of the ACF and PACF give some basis to argue for either an AR(1) or ARMA(1,1) process.
 
@@ -40,8 +45,6 @@ The validity of both models was assessed graphically through `tsidag`. For the $
 grid.arrange(tsdiag(Xt.arma11),tsdiag(Xt.ar1),ncol=2)
 ```
 
-## Considered processes: ARMA(1,1), AR(1), AR(2)
-
 ## Imputation
 
 - Introduce missing values
@@ -49,5 +52,3 @@ grid.arrange(tsdiag(Xt.arma11),tsdiag(Xt.ar1),ncol=2)
 - imputation using different strategies
 
 - discussion of imputation results
-
-## Exogeneous data

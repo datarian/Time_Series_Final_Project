@@ -17,3 +17,23 @@ We have decided to focus on these three processes throughout the analysis.
 The project team investigated several approaches to obtain a stationary time series. Once this was achieved, we fitted the most likely processes mentioned above and compared three different imputation approaches in terms of best prediction of randomly selected missing values in the series.
 
 Furthermore, we investigated how exogeneous data could be employed to achieve a stationary time series. This investigation was done on a separate time series contained in the R-package 'dplR' [@dplR] and using climatic data originating from the U.S. National Oceanographic and Athmosperic Administration.
+
+## Methods
+
+### Achieving stationarity of the time series
+
+In the following section, removal of trend and model fitting will be discussed. The following approaches were analysed:
+
+**Power transformation / Box-Cox transform:** These methods are related and aim to stabilize variance in a model-independent manner, i.e. irrespective of the time series process that is deduced from the resulting stationary series. The methods work by finding the transformation index $\lambda$ that minimizes the coefficient of variation of the series [@box1976time]. In short, [@guerrero2004] suggests dividing the time series into $H\geq2$ equal-sized subseries, computing mean $\bar{Z_h}$ and standard deviation $S_h$ for each subseries and then search for $\lambda$ such that $\frac{S_h}{\bar{Z}^{1-\lambda}_h}=c ; h=1,...H$ where $c>0$ is a constant value.
+
+**Woollons** The method proposes to initially detrend the data by fitting a polynomial, then dividing the residuals by the fitted values  [see @woollons1990time]. To summarise, the proposed approach is an estimate of the form $Y = \alpha*t^{\beta}*e^{\delta*t}$. Taking the log on both sides yields something linear in $ln(t)$.
+
+**Log transformation & linear trend** This approach was considered on intuitive grounds and was inspired by information given in the accompanying lecture. Variance stabilisation was tackled by the transformation $\frac{\bar{r}_t}{sd_t},t=1400,...,1800$, followed by fitting a first-order trend on the log-transformed and variance-stabilized series.
+
+### Imputation
+
+    - imputeTS: na.kalman -> emphasize this
+
+    - forecast: na.interp
+
+    - zoo: na.approx

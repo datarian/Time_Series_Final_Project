@@ -77,10 +77,10 @@ rwl_mean_ts <- ts(rwl_mean,end=2017)
 ```{r child="introduction.Rmd"}
 ```
 
-```{r child="methods.Rmd"}
+```{r child="description.Rmd"}
 ```
 
-```{r child="results_discussion.Rmd"}
+```{r child="modelling.Rmd"}
 ```
 
 ```{r child="conclusion.Rmd"}
