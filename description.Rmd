@@ -1,6 +1,8 @@
 # Description
 
-The dataset ${rwl}$ comprises measurements of $N=234$ tree ring sequences originating from the Bernese Oberland. The individual sequences are dated (the most recent ring has a year associated to it), which allows to give the timespan from oldest tree (first ring measured) to most recent tree as 1332 to 2017. The length of the series is therefore $T=686$ years.
+The chronology used for this project has been compiled from 234 individual measurements of buildings in the Bernese Oberland which are all located above 900 meters. Typically, the wooden structure of old buildings is sampled by boring the beams. The drilling core is then analyzed by microscoping, recording the sequence of tree ring widths. Spruce was a common building material and there is a wealth of houses supplying data. The data can be assumed to originate almost entirely from trees that grew above 900 meters since trees were rarely transported uphill. The data has been supplied by the archaeological service of the canton Berne [@dendroBern] through a personal contact at the dendrology laboratory in Sutz, BE who also detailed the process of acquiring the samples.
+
+The dataset $rwl$ comprises measurements of $N=234$ tree ring sequences originating from the Bernese Oberland. The individual sequences are dated (the most recent ring has a year associated to it), which allows to give the timespan from oldest tree (first ring measured) to most recent tree as 1332 to 2017. The length of the series is therefore $T=686$ years.
 
 Let $R_t = \{r_{ti}, i=1,...N\}$ the set of ring width measurements for fixed year $t, t \in [1332,2017]$.
 

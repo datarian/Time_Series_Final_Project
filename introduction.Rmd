@@ -1,34 +1,30 @@
 # Introduction
 
-Dendrochronology is an archaeological method for dating artifacts (other uses are i.e. radiocarbon calibration, geomorphological dating, dendroclimatology, ...). Chronologies are constructed by measuring the patterns of tree ring widths from individual wooden artifacts, then overlaying the data to build up a continuous series of yearly mean ring widths spanning hundreds to thousands of years. Newly measured artifacts are matched to existing, dated chronologies serving the double purpose of strengthening the chronology and dating the artifact in question. Chronologies are generally constructed for defined geographical regions as the environment (i.e the local climate, soil properties and terrain) has substantial impact on the growth of trees [@baillie2012slice].
+In this project, a dendrochronology was analysed.
 
-## Dating buildings through dendrochronology
+Dendrochronology is an archaeological method for dating artifacts (other uses are i.e. radiocarbon calibration, geomorphological dating, dendroclimatology, ...). Chronologies are constructed by measuring the patterns of tree ring widths from individual wooden artifacts, then overlaying the data with other measured artifacts to build up a continuous series of yearly mean ring widths spanning hundreds to thousands of years. Newly measured artifacts are matched to existing, dated chronologies serving the double purpose of strengthening the chronology and dating the artifact in question. Chronologies are generally constructed for defined geographical regions as the environment (i.e the local climate, soil properties and terrain) has substantial impact on the growth of trees [@baillie2012slice].
 
-The chronology used for this project has been compiled from 234 individual measurements of buildings in the Bernese Oberland which are all located above 900 meters. Typically, the wooden structure of old buildings is sampled by boring the beams. The drilling core is then analyzed by microscoping, recording the sequence of tree ring widths. Spruce was a common building material and there is a wealth of houses supplying data. The data can be assumed to originate almost entirely from trees that grew above 900 meters since trees were rarely transported uphill. The data has been supplied by the archaeological service of the canton Berne [@dendroBern] through a personal contact at the dendrology laboratory in Sutz, BE who also detailed the process of acquiring the samples.
-
-## Time series analysis and dendrochronologies
-
-Literature states a few common time series processes that fit many dendrochronologies. Interestingly, for series less than 200 years long, ${AR}(1)$ has been identified as the predominant trend while ${ARMA}(1,1)$ better fits longer series [@woollons1990time], [@FOX2001261]. Other sources [@dplR] name ${AR}(2)$ as a frequently obtained process.
-
-We have decided to focus on these three processes throughout the analysis.
+Literature states a few common time series models that fit many dendrochronologies. Interestingly, for series less than 200 years long, ${AR}(1)$ has been identified as the predominant trend while ${ARMA}(1,1)$ better fits longer series [@woollons1990time, @FOX2001261]. We relied on this knowledge when assessing the appropriate model for our data.
 
 ## Scope of this report
 
 The project team investigated several approaches to obtain a stationary time series. Once this was achieved, we fitted the most likely processes mentioned above and compared three different imputation approaches in terms of best prediction of randomly selected missing values in the series.
 
-Furthermore, we investigated how exogeneous data could be employed to achieve a stationary time series. This investigation was done on a separate time series contained in the R-package 'dplR' [@dplR] and using climatic data originating from the U.S. National Oceanographic and Athmosperic Administration.
-
 ## Methods
 
 ### Achieving stationarity of the time series
 
-In the following section, removal of trend and model fitting will be discussed. The following approaches were analysed:
+The following approaches were analysed:
 
 **Power transformation / Box-Cox transform:** These methods are related and aim to stabilize variance in a model-independent manner, i.e. irrespective of the time series process that is deduced from the resulting stationary series. The methods work by finding the transformation index $\lambda$ that minimizes the coefficient of variation of the series [@box1976time]. In short, [@guerrero2004] suggests dividing the time series into $H\geq2$ equal-sized subseries, computing mean $\bar{Z_h}$ and standard deviation $S_h$ for each subseries and then search for $\lambda$ such that $\frac{S_h}{\bar{Z}^{1-\lambda}_h}=c ; h=1,...H$ where $c>0$ is a constant value.
 
 **Woollons** The method proposes to initially detrend the data by fitting a polynomial, then dividing the residuals by the fitted values  [see @woollons1990time]. To summarise, the proposed approach is an estimate of the form $Y = \alpha*t^{\beta}*e^{\delta*t}$. Taking the log on both sides yields something linear in $ln(t)$.
 
 **Log transformation & linear trend** This approach was considered on intuitive grounds and was inspired by information given in the accompanying lecture. Variance stabilisation was tackled by the transformation $\frac{\bar{r}_t}{sd_t},t=1400,...,1800$, followed by fitting a first-order trend on the log-transformed and variance-stabilized series.
+
+### Model fitting
+
+We used `itsmr::autofit()` to identify the best fitting model. Candidates were then analysed graphically and assessed.
 
 ### Imputation
 
