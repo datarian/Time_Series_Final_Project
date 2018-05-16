@@ -23,10 +23,10 @@ source("analysis//make_series_stationary.R")
 # standard deviation (see 'make_series_stationary.R'). We calculate the
 # mean-squared errors to compare the godness of fit. In particular, we model the
 # transformed tree ring series either as AR(1), AR(2) or ARMA(1,1). The standard
-# deviation is estimated as an AR(2) process. We also compare the results to the
-# case when the standard deviation is known or linearly interpolated. All
-# models are compared to the benchmark which is to use linear interpolation on
-# the original time series.
+# deviation is estimated as an AR(2) and as an ARMA(1,1) process. We also compare
+# the results to the case when the standard deviation is known or linearly
+# interpolated. All models are compared to the benchmark which is to use linear
+# interpolation on the original time series.
 
 # Literature:
 # https://sites.ualberta.ca/~sfossati/e509/files/other/dlm_ex.R
@@ -92,7 +92,7 @@ buildAR2 <- function(x){
 
     FF <- matrix(c(1,0), nrow=1)
     GG <- matrix(c(phi1, phi2, 1, 0), byrow=T, nrow=2)
-    V <- 0 #1e-5 # Due to convergence issues we define V to be slightly different from 0
+    V <- 0
     W <- diag(c(sd^2, 0))
 
     mAR2 <- dlm(FF=FF, GG=GG, V=V, W=W, m0=matrix(c(0,0), ncol=1), C0=diag(c(1e4, 1e4)))
@@ -132,7 +132,7 @@ b <- res[1]
 c <- res[2]
 c/b
 
-
+svd(W)
 
 buildARMA11 <- function(x){
     phi <- x[1]
@@ -146,7 +146,8 @@ buildARMA11 <- function(x){
 
     K_W <- matrix(c(1,theta,0,0), 2,2) # K_W SHOULD BE LIKE THIS, BUT ...
     K_W <- K_W + matrix(c(1e-5,1e-5,1e-5,1e-5),2,2) # ... WE NEED TO ADD SOME NOISE ...
-    W <- (K_W%*%t(K_W))%*%diag(c(sd^2, sd^2)) # ... BECAUSE W NEEDS TO BE DECOMPOSED INTO ITS CHOLESKY FACOTORS.
+    W <- (K_W%*%t(K_W))%*%diag(c(sd^2, sd^2)) # ... OTHERWISE DLM WARNS THAT W IS ...
+    # ... NOT A COVARIANCE MATRIX (IN PARTICULAR WHEN WE WANT TO MODEL THE SD TIME SERIES.
 
     mARMA11 <- dlm(FF=FF, GG=GG, V=V, W=W, m0=matrix(c(0,0), ncol=1), C0=diag(c(1e4, 1e4)))
     return(mARMA11)
@@ -265,7 +266,7 @@ for (i in impute_idx){
 # Check of the results
 # ------------------------------------------------------------------------------
 imputed_widths_transformed
-convergence_mat_widths # 0 means that optimization algorithm has converged
+convergence_mat_width # 0 means that optimization algorithm has converged
 
 
 # Imputations on the centered time series of the standard deviation
@@ -440,28 +441,28 @@ mse_back_transformed_sd_ar2 <- rowSums((y_imputed_sd_ar2_mat - matrix(spruce_win
                                     nrow=nrow(imputed_widths_transformed),
                                     ncol=length(impute_idx), byrow=T))^2)/length(impute_idx)
 
-# 510.1684 492.8473 484.3971 527.1005 # Linear Interpolation of the tree ring width is worst
+# 510.1684 492.8501 484.3971 527.1005 # Linear Interpolation of the tree ring width is worst
 
 # sd as ARMA(1,1)
 mse_back_transformed_sd_arma11 <- rowSums((y_imputed_sd_arma11_mat - matrix(spruce_window[impute_idx],
                                     nrow=nrow(imputed_widths_transformed),
                                     ncol=length(impute_idx), byrow=T))^2)/length(impute_idx)
 
-# 286.4674 281.8937 274.1978 306.1778 # Linear Interpolation of the tree ring width is worst
+# 286.4674 281.7908 274.1983 306.1778 # Linear Interpolation of the tree ring width is worst
 
 # sd linearly interpolated
 mse_back_transformed_sd_lin_int <- rowSums((y_imputed_sd_lin_int_mat - matrix(spruce_window[impute_idx],
                                     nrow=nrow(imputed_widths_transformed),
                                     ncol=length(impute_idx), byrow=T))^2)/length(impute_idx)
 
-# 273.5193 278.4170 275.7507 285.8944 # Linear Interpolation of the tree ring width is worst
+# 273.5193 278.2707 275.7508 285.8944 # Linear Interpolation of the tree ring width is worst
 
 # true sd
 mse_back_transformed_sd_true <- rowSums((y_imputed_sd_true_mat - matrix(spruce_window[impute_idx],
                                     nrow=nrow(imputed_widths_transformed),
                                     ncol=length(impute_idx), byrow=T))^2)/length(impute_idx)
 
-# 175.8117 170.2653 163.2713 169.1063 # Linear interpolation is second
+# 175.8117 170.2908 163.2709 169.1063 # Linear interpolation is second
 
 # MSE of the time series resulting from linearlly interpolate the original time
 # series
@@ -532,11 +533,45 @@ points(y=imputed_widths_transformed_imputeTS, x=1:length(impute_idx), col="blue"
 plot(y=imputed_sd[2,], x=1:length(impute_idx), type="p")
 points(y=imputed_sd_imputeTS, x=1:length(impute_idx), col="blue")
 
-# Is linear interpolation for the sd still best?
+# As ggplots
+# Widths
+#.......
+df_widths <- data.frame(Transformed_Width=c(imputed_widths_transformed[3,], imputed_widths_transformed_imputeTS),
+                        Index = c(impute_idx, impute_idx),
+                        Method = c(rep(1, length(impute_idx)), rep(2, length(impute_idx))))
+df_widths$Method <- factor(df_widths$Method, labels=c("Own implementation", "imputeTS"))
+
+
+pplot_width_comparison <- ggplot(df_widths, aes(y=Transformed_Width, x=Index, group=Method))
+pplot_width_comparison + geom_point(aes(col=Method), alpha = 0.8) +
+    scale_color_manual(values=c("blue", "green"))+
+    labs(title="Imputed widths (transformed series): own implementation vs. imputeTS",
+         y="Width") +
+    theme(legend.position="bottom",
+          plot.title = element_text(face="bold", hjust=0.5))
+
+# Centered sd
+#............
+df_sd <- data.frame(Centered_SD=c(imputed_sd[2,], imputed_sd_imputeTS),
+                        Index = c(impute_idx, impute_idx),
+                        Method = c(rep(1, length(impute_idx)), rep(2, length(impute_idx))))
+df_sd$Method <- factor(df_widths$Method, labels=c("Own implementation", "imputeTS"))
+
+
+pplot_width_comparison <- ggplot(df_sd, aes(y=Centered_SD, x=Index, group=Method))
+pplot_width_comparison + geom_point(aes(col=Method), alpha = 0.8) +
+    scale_color_manual(values=c("blue", "green"))+
+    labs(title="Imputed SD (centered series): own implementation vs. imputeTS",
+         y="Centered SD") +
+    theme(legend.position="bottom",
+          plot.title = element_text(face="bold", hjust=0.5))
+
+
+# Is linear interpolation for the sd still as good as assuming an ARMA(1,1)?
 # ------------------------------------------------------------------------------
-# Here we check if it is still best to linearlly interpolate the sd. The alternative
-# is to assume an ARMA(1,1) process. The process of the transformed tree ring width
-# is ARMA(1,1).
+# Here we check if it is still equivalent in terms of MSE to linearly interpolate
+# the sd. The alternative is to assume an ARMA(1,1) process. The process of the
+# transformed tree ring width is ARMA(1,1).
 
 # Back-transformation
 # ..............................................................................
@@ -549,17 +584,97 @@ y_back_transformed_sd_lin_int_imputeTS <- y_transformed_imputeTS*(imputed_sd[3,]
 # MSE back-transformed vs. linearlly interpolated sd vs. linearlly interpolated orginal values
 # ..............................................................................
 mse_sd_arma11_imputeTS <- mean((spruce_window[impute_idx]-y_back_transformed_sd_arma11_imputeTS)^2)
-# 256.1351 # This value is sligthly better than our
+# 256.1351 # This value is sligthly better than with our implementation
 
-mse_sd_arma11_imputeTS <- mean((spruce_window[impute_idx]-y_back_transformed_sd_lin_int_imputeTS)^2)
+mse_sd_lin_int_imputeTS <- mean((spruce_window[impute_idx]-y_back_transformed_sd_lin_int_imputeTS)^2)
 # 275.6912 # Same value as with our implementation
+
+
+# Plot of the time series with the imputed values
+################################################################################
+# Here we plot the resulting time series using our implementation and  the imputeTS
+# package. We also plot the results that we achieve by simply linearly interpolate
+# the orginal time series.
+
+# Own implementation
+# ------------------------------------------------------------------------------
+own_implementation <- rep(NA, times=length(spruce_window))
+own_implementation[impute_idx] <- y_imputed_sd_arma11_mat[3,]
+if (impute_idx[1] > 1){
+    own_implementation[impute_idx-1] <- spruce_window[impute_idx-1]
+} else {
+    own_implementation[impute_idx[-1]-1] <- spruce_window[impute_idx[-1]-1] # first index could be 1
+}
+own_implementation[impute_idx+1] <- spruce_window[impute_idx+1]
+
+# ImputeTS
+# ------------------------------------------------------------------------------
+imputeTS <- rep(NA, times=length(spruce_window))
+imputeTS[impute_idx] <- y_back_transformed_sd_arma11_imputeTS
+if (impute_idx[1] > 1){
+    imputeTS[impute_idx-1] <- spruce_window[impute_idx-1]
+} else {
+    imputeTS[impute_idx[-1]-1] <- spruce_window[impute_idx[-1]-1] # first index could be 1
+}
+imputeTS[impute_idx+1] <- spruce_window[impute_idx+1]
+
+# Linear interpolation of the original time series
+# ------------------------------------------------------------------------------
+lin_int <- rep(NA, times=length(spruce_window))
+lin_int[impute_idx] <- as.numeric(y_original_lin_int)
+if (impute_idx[1] > 1){
+    lin_int[impute_idx-1] <- spruce_window[impute_idx-1]
+} else {
+    lin_int[impute_idx[-1]-1] <- spruce_window[impute_idx[-1]-1] # first index could be 1
+}
+lin_int[impute_idx+1] <- spruce_window[impute_idx+1]
+
+# True values with NA where we impute
+# ------------------------------------------------------------------------------
+true_without_imputed <- spruce_window
+true_without_imputed[impute_idx] <- NA
+
+# True values
+# ------------------------------------------------------------------------------
+true_imputed <- rep(NA, times=length(spruce_window))
+true_imputed[impute_idx] <- as.numeric(spruce_window[impute_idx])
+if (impute_idx[1] > 1){
+    true_imputed[impute_idx-1] <- spruce_window[impute_idx-1]
+} else {
+    true_imputed[impute_idx[-1]-1] <- spruce_window[impute_idx[-1]-1] # first index could be 1
+}
+true_imputed[impute_idx+1] <- spruce_window[impute_idx+1]
+
+
+# Data frame for the ggplot
+# ------------------------------------------------------------------------------
+data <- data.frame(Values=c(own_implementation, imputeTS, lin_int, true_imputed, true_without_imputed),
+                            Time = rep(1400:1800, 5),
+                            Method = c(rep(1, length(spruce_window)), rep(2, length(spruce_window)),
+                                           rep(3, length(spruce_window)), rep(4, length(spruce_window)),
+                                       rep(5, length(spruce_window))))
+
+data$Method <- factor(data$Method, labels=c("Own implementation", "imputeTS",
+                                    "Linear interpolation", "True imputation", "Original series"))
+
+data_NA_removed <- data[!is.na(data$Values),]
+tail(data_NA_removed)
+
+pplot_comparison <- ggplot(data, aes(y=Values, x=Time, group=Method))
+pplot_comparison + geom_line(aes(col=Method), alpha = 1) +
+    scale_color_manual(values=c("blue", "green", "purple", "red", "black")) +
+    scale_linetype_manual(values=c("solid", "solid", "solid", "solid", "solid")) +
+    labs(title="Imputed values") +
+    theme(legend.position="bottom",
+          plot.title = element_text(face="bold", hjust=0.5)) +
+    geom_vline(xintercept = t[impute_idx], col="grey")
 
 # Summary
 ################################################################################
 # The results with the imputeTS package are slighty better. In particlar, the
 # imputaions of the centered sd in case of assuming an ARMA(1,1) process works
 # slightly better than with our implementation. A reason could be that we have
-# to add somenoise to the covariance matrix when implementing the ARMA(1,1) process
+# to add some noise to the covariance matrix when implementing the ARMA(1,1) process
 # as state space model so that the dlm package is able to do the cholesky decomposition.
 # The imputeTS package seems to handle this better.
 
