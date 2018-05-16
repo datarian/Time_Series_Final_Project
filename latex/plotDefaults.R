@@ -3,6 +3,7 @@ library(ggplot2)
 ggplot2::theme_set(ggplot2::theme_bw(base_size = 10))
 ggplot2::theme_update(
     plot.background = ggplot2::element_rect(colour="white"),
+    plot.title = element_text(hjust = 0.5),
     panel.background = ggplot2::element_rect(colour = "black", fill=NA),
     panel.grid.major = ggplot2::element_line(size=0.3, colour="grey"),
     panel.grid.minor = ggplot2::element_line(size=0.1, colour="grey"),

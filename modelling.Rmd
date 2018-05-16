@@ -2,22 +2,31 @@
 
 ## Transformation
 
+For the stationary series used as a basis for further analysis, the original series was transformed by scaling, i.e. through dividing the yearly mean ring width $\bar{r}_t$ by the standard deviation of yearly ring widths of all measured trees, $sd_t$.
 
-## Acieving stationarity
 
-The approaches yielded very different results, as can be observed in figure \ref{fig:stationarity_alternatives}. The top plot shows the series that was used for further analyis. It is not immediately apparent from the plot, but the transformed series passed the stationarity tests(see \ref{fig:}). The method proposed by @woollons1990time had much larger variance and is therefore shown separately in figure \ref{fig:stationaritywoollons}. Power transform and Box-Cox transform shown at the bottom are effectively the inverse of each other.
 
-```{r stationarity_alternatives, fig.cap="Comparison of different methods to achieve a stationary time series. Top: log-transformed with order 1 trend removal, bottom left: power transform and box-cox transform, bottom right: Woollons method.",out.width="\textwidth"}
-layout <- rbind(c(1,1),c(2,3))
-grid.arrange(stationarity_data_log_order1_varstab,
+## Achieving stationarity
+
+We decided to use the series obtained through a scaling transformation, followed by log-transformation and then order-1 trend removal. The three approaches studied yielded very different results, as can be observed in figure \ref{fig:stationarity_alternatives}.
+
+The top plot shows the series that was used for further analyis. The series is mean-centered and shows a relatively constant variance. A weak stationarity can be assumed. The method proposed by @woollons1990time had much larger variance. Power transform and Box-Cox transform shown at the bottom are effectively the inverse of each other.
+
+```{r stationarity_alternatives, fig.cap="Comparison of different methods to achieve a stationary time series. Top: log-transformed with order-1 trend removal, middle: Woollons method., bottom: power transform and box-cox transform", out.width="0.8\\linewidth"}
+library(gtable)
+library(grid)
+library(ggplot2)
+library(egg)
+
+grid.draw(ggarrange(stationarity_data_log_order1_varstab,
              stationarity_woollons_plot,
-             stationarity_powerbox_plot
-             , ncol=1)
+             stationarity_powerbox_plot, nrow=3))
+
 ```
 
 ## Model selection
 
-The stationary time series labelled "Log trans., order1" in figure \ref{fig:stationaritycomparison} was chosen for further analysis as it appeared the most stationary (mean: `r Xt.bar`.  It's ACF / PACF plots are shown in figure \ref{fig:acfpacf_chosen}. The shape of the ACF and PACF give some basis to argue for either an AR(1) or ARMA(1,1) process.
+The ACF and PACF plots of the stationary series are shown in figure \ref{fig:acfpacf_chosen}. The shape of the ACF and PACF give some basis to argue for either an AR(1) or ARMA(1,1) process.
 
 ```{r acfpacf_chosen, fig.cap="ACF (left) and PACF (right) of the chosen stationary time series."}
 acf <- ggAcf(data_log_order1_varstab$y, main="") +
@@ -28,7 +37,9 @@ grid.arrange(acf,pacf,ncol=2)
 
 ```
 
-Confirming the graphical analyis, an $ARMA(1,1)$ model was found through `autofit` from package `itsmr` with parameters `autofit(x=Xt,p=0:3, q=0:3,mean.include=F)`. We then cross-checked with the function `arima` and found similar parameters. Additionally, it was decided to also include an $AR(1)$ process. An overview of the parameters for each model and their standard deviation is given in table \ref{tab:modelcomp}.
+Confirming the graphical analyis, an ARMA(1,1) model was found through `autofit` from package `itsmr` with parameters `autofit(x=Xt,p=0:3, q=0:3,mean.include=F)`. Using the function `arima`, similar values for $\phi$ and $\theta$ were found. Additionally, it was decided to also include an AR(1) and AR(2) model into the further analysis. An overview of the parameter values and their standard deviation for each model is given in table \ref{tab:modelcomp}. The standard deviation is small compared to the parameter values for every parameter, so they all appear to be significant.
+
+Causality was assessed through finding the root of 
 
 ```{r modelcomp}
 kable(modelComparisonTable, booktabs=T,
@@ -36,13 +47,20 @@ kable(modelComparisonTable, booktabs=T,
       escape=FALSE) %>%
 kable_styling(latex_options = c("hold_position"), position = "center") %>%
 group_rows("ARMA(1,1)",1,3) %>%
-group_rows("AR(1)",4,5)
+group_rows("AR(1)",4,5) %>%
+    group_rows("AR(2)",6,8)
 ```
-The validity of both models was assessed graphically through `tsidag`. For the $ARMA(1,1)$ model, the residuals are confirmed to be white noise. The Ljung-box statistic for various lags showed that for the $AR(1)$ model, the residuals are not white noise. The plots are shown in figure \ref{fig:tsdiag}.
 
-```{r tsdiag, fig.cap="Diagnostic plots for the fitted models. Left: ARMA(1,1), right: AR(1).", out.width = "\\linewidth"}
-grid.arrange(tsdiag(Xt.arma11),tsdiag(Xt.ar1),ncol=2)
+The validity of both models was assessed graphically through `tsidag`. For the $ARMA(1,1)$ model, the residuals are confirmed to be white noise (see \ref{fig:tsdiagarma11}. The Ljung-box statistic for various lags showed that for the $AR(1)$ model, the residuals are not white noise (see \ref{fig:tsdiag.ar1}, which is also evident from the ACF, which shows some dependence left.
+
+```{r tsdiagarma11, fig.cap="Diagnostic plots for ARMA(1,1)", fig.asp=1.5, out.width="0.5\\linewidth"}
+tsdiag(Xt.arma11)
 ```
+
+```{r tsdiagar1, fig.cap="Diagnostic plots for AR(1).", fig.asp=1.5, out.width="0.5\\linewidth"}
+tsdiag(Xt.ar1)
+```
+
 
 ## Imputation
 

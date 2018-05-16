@@ -4,7 +4,7 @@ In this project, a dendrochronology was analysed.
 
 Dendrochronology is an archaeological method for dating artifacts (other uses are i.e. radiocarbon calibration, geomorphological dating, dendroclimatology, ...). Chronologies are constructed by measuring the patterns of tree ring widths from individual wooden artifacts, then overlaying the data with other measured artifacts to build up a continuous series of yearly mean ring widths spanning hundreds to thousands of years. Newly measured artifacts are matched to existing, dated chronologies serving the double purpose of strengthening the chronology and dating the artifact in question. Chronologies are generally constructed for defined geographical regions as the environment (i.e the local climate, soil properties and terrain) has substantial impact on the growth of trees [@baillie2012slice].
 
-Literature states a few common time series models that fit many dendrochronologies. Interestingly, for series less than 200 years long, ${AR}(1)$ has been identified as the predominant trend while ${ARMA}(1,1)$ better fits longer series [@woollons1990time, @FOX2001261]. We relied on this knowledge when assessing the appropriate model for our data.
+Literature states a few common time series models that fit many dendrochronologies. Interestingly, for series less than 200 years long, ${AR}(1)$ has been identified as the predominant trend while ${ARMA}(1,1)$ better fits longer series [@woollons1990time and  @FOX2001261]. AR(2) is mentioned as a frequently observed process in @dplR. We relied on this knowledge when assessing the appropriate model for our data.
 
 ## Scope of this report
 

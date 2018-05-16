@@ -63,16 +63,8 @@ library(dplyr)
 library(gridExtra)
 library(knitr)
 library(kableExtra)
+library(dplR)
 op <- par(no.readonly = F)
-
-#rwl <- readRDS("data/rwl_900+.Rds")
-#rwl_mean <- apply(rwl, 1, mean, na.rm=T)
-#rwl_sd <- apply(rwl,1,sd,na.rm=T)
-#depthfun <- function(x) sum(!is.na(x))
-#rwl_depth <- apply(rwl,1,depthfun)
-#time <- seq(1332,2017,1)
-
-#rwl_mean_ts <- ts(rwl_mean,end=2017)
 ```
 
 ```{r child="introduction.Rmd"}

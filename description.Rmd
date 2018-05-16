@@ -15,11 +15,13 @@ Let ${sd}_t = \sqrt{\frac{1}{n_t-1}\sum^N_{i=1}(y_i-x_t)^2*\mathds{1}_{(y_i \neq
 Let $\bar{R}=\{\bar{r_t}, t=1,...,T\}$ the set of yearly mean tree ring widths of all the individual trees with data for a given year. The unit is `1/100 mm`.
 
 ```{r originalseries, fig.cap="The timeseries of yearly mean tree ring widths."}
-seriesMeanPlot
-```
-The series of mean tree ring widths is shown in figure \ref{fig:originalseries}. It is obvious that there is no seasonal component in the data.
-```{r datacharacteristics, fig.cap="Cardinality (left) and residuals after linear trend removal (right)",fig.width=7, out.width = "\\linewidth"}
-grid.arrange(seriesDepthPlot,seriesHeteroskedasticityPlot,ncol=2)
+plot(chron(rwl_df),ylab="Mean ring width [1/100 mm]")
 ```
 
-The supplier of the data recommended to ignore data after 1800 due to insufficient quality of data for these years, with a prevalence of young trees distorting $\bar{r_t}$ in that time range (compare \ref{fig:originalseries}). Additionally, it was decided to discard data before 1400 because of a very small sample depth in years before 1400 (see figure \ref{fig:datacharacteristics}, left) . The analysis has therefore been conducted with the set $\bar{R^*}={r_t, t \in [1400;1800]}$.
+The series of mean tree ring widths is shown in figure \ref{fig:originalseries}, created with the package `dplR`. The grey overlay represents the sample depth, the number of measurements for a given year. From the plot, a correlation between sample depth and ring width could be assumed, however it was not significant when fitted in a model:
+
+```{r fitsampledepth, results='markup', size="footnotesize"}
+summary(lm(rwl_mean~year+rwl_depth))$coef
+```
+
+The supplier of the data recommended to ignore data after 1800 due to insufficient quality of data for these years, with a prevalence of young trees distorting $\bar{r_t}$ in that time range (see \ref{fig:originalseries}). Additionally, it was decided to discard data before 1400 because of a very small sample depth in the years before that. The analysis has therefore been conducted with the set $\bar{R^*}={r_t, t \in [1400;1800]}$.
