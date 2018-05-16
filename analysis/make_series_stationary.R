@@ -269,7 +269,7 @@ summary(m)
 b <- m$coef[2]
 
 R_transformed <- R^(1-b)
-data_powertrans <- as.data.frame(cbind(Time=t, y=R_transformed,model=rep("Power transformed",times=length(t))))
+data_powertrans <- as.data.frame(cbind(Time=t, y=R_transformed,method=rep("Power transformed",times=length(t))))
 
 
 plot(y=R_transformed, x=1:length(R_transformed), type="l")
@@ -281,7 +281,7 @@ summary(m)
 
 R_transformed_centered <- m$residuals
 
-data_powertrans_centered <- as.data.frame(cbind(Time=t, y=R_transformed_centered,model=rep("Power trans. centered",times=length(t))))
+data_powertrans_centered <- as.data.frame(cbind(Time=t, y=R_transformed_centered,method=rep("Power trans. centered",times=length(t))))
 
 acf(R_transformed_centered)
 pacf(R_transformed_centered) # => AR(2)
@@ -323,7 +323,7 @@ l <- lambdas$x[which.max(lambdas$y)] # this is the MLE lambda to transform data
 spruce_window_boxcox <- (spruce_window^l-1)/l-mean((spruce_window^l-1)/l) # Box-Cox transformation
 plotc(spruce_window_boxcox)
 
-data_boxcox <- as.data.frame(cbind(Time=t, y=spruce_window_boxcox,model=rep("Box-Cox transform",times=length(t))))
+data_boxcox <- as.data.frame(cbind(Time=t, y=spruce_window_boxcox,method=rep("Box-Cox transform",times=length(t))))
 
 acf(spruce_window_boxcox)
 pacf(spruce_window_boxcox)
@@ -349,26 +349,32 @@ summary(m2)
 plotc(m$residuals)
 
 data_log_order1_varstab <- as.data.frame(cbind(Time=t, y=m$residuals,model=rep("Log trans., order 1",times=length(t))))
+data_log_order1_varstab$Time <- as.numeric(levels(data_log_order1_varstab$Time)[data_log_order1_varstab$Time])
+data_log_order1_varstab$y <- as.numeric(levels(data_log_order1_varstab$y)[data_log_order1_varstab$y])
 
 
 
 ################################################################################
-# Overview plot
+# Overview plots
 
-data <- rbind(data_powertrans_centered,
-              data_boxcox,
-              data_log_order1_varstab,
-              data_p_order2)
-data$Time <- as.numeric(levels(data$Time)[data$Time])
-data$y <- as.numeric(levels(data$y)[data$y])
-
-stationarity_woollons_plot <- ggplot(data_woollons_sd_stab,aes(x=Time,y=y,colour=model)) +
+# woollons
+stationarity_woollons_plot <- ggplot(data_woollons_sd_stab,aes(x=Time,y=y)) +
     geom_line(size=0.5) +
-    ylab("Ring width [1/100 mm]")
+    ylab("")
 
-stationarity_comparison_plot <- ggplot(data, aes(x=Time,y=y,colour=model)) +
+
+# power transformation & box-cox
+data_powerbox <- rbind(data_powertrans_centered,
+                       data_boxcox)
+data_powerbox$Time <- as.numeric(levels(data_powerbox$Time)[data_powerbox$Time])
+data_powerbox$y <- as.numeric(levels(data_powerbox$y)[data_powerbox$y])
+stationarity_powerbox_plot <- ggplot(data_powerbox,aes(x=Time,y=y,colour=method)) +
     geom_line(size=0.5) +
-    ylab("Ring width [1/100 mm]")
+    ylab("")
+
+stationarity_data_log_order1_varstab <- ggplot(data_log_order1_varstab,aes(x=Time,y=y)) +
+    geom_line(size=0.5) +
+    ylab("")
 
 ###############################################################################
 # Model identification
@@ -384,28 +390,25 @@ Xt.autofit <- autofit(x=Xt,p=1:3,q=0:3) # ARMA(1,1) was found.
 
 Xt.arma11 <- arima(x=Xt,order=c(1,0,1),include.mean = F)
 arma11.phi <- Xt.arma11$model$phi
+arma11.phi.causal <- abs( polyroot(c(1,-arma11.phi)))
 arma11.theta <- Xt.arma11$model$theta
 arma11.sigma2 <- Xt.arma11$sigma2
 
 Xt.ar1 <- arima(x=Xt,order=c(1,0,0),include.mean = F)
 ar1.phi <- Xt.ar1$model$phi
+ar1.phi.causal <- abs( polyroot(c(1,-ar1.phi)))
 ar1.sigma2 <- Xt.ar1$sigma2
 
-paramnames <- c("$\\phi$","$\\theta$","$\\sigma^2$","$\\phi$","$\\sigma^2$")
-parameters <- c(arma11.phi,arma11.theta,arma11.sigma2,ar1.phi,ar1.sigma2)
+Xt.ar2 <- arima(x=Xt,order=c(2,0,0),include.mean = F)
+ar2.phi <- Xt.ar2$model$phi
+ar2.phi.causal <- abs( polyroot(c(1,-ar2.phi)))
+ar2.sigma2 <- Xt.ar2$sigma2
 
-se <- c(sqrt(diag(Xt.arma11$var.coef)),"-",sqrt(diag(Xt.ar1$var.coef)),"-")
+#modelnames <- c(rep("ARMA(1,1)",times=3),rep("AR(1",times=2))
+paramnames <- c("$\\phi$","$\\theta$","$\\sigma^2_{ARMA(1,1)}$","$\\phi$","$\\sigma^2_{AR(1)}$","$\\phi_1$","$\\phi_2$","$\\sigma^2_{AR(2)}$")
+parameters <- round(c(arma11.phi,arma11.theta,arma11.sigma2,ar1.phi,ar1.sigma2,ar2.phi,ar2.sigma2),digits=3)
+
+se <- c(round(sqrt(diag(Xt.arma11$var.coef)),digits=3),"-",round(sqrt(diag(Xt.ar1$var.coef)),digits=3),"-",round(sqrt(diag(Xt.ar2$var.coef)),digits=3),"-")
 
 modelComparisonTable <- data.frame(paramnames,parameters,se)
 colnames(modelComparisonTable) <- c("Parameter name", "Parameter value", "standard error")
-
-
-# Let's look at the residuals of the model
-#plotc(model_used$residuals)
-
-# summary of the diagnostic checking; using the tsdiag function
-#tsdiag(model_used)
-# In addition to the ACF; we can see all Ljung-box tests for all possible lags.
-# The p-value is larger than 5% in each case, meaning that we cannot reject the Hypothesis H0 that
-# these residuals are a white-noise.
-# So that's good. These residuals seem to be indeed a white-noise (good ACF; large pvalues on Ljungbox tests)
