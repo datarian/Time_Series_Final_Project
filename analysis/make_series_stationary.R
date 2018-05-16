@@ -12,6 +12,8 @@ library(MASS)
 #spruce_window <- window(spruce_sup_900_ts,start=1400, end=1800)
 raw_rwl <- readRDS("data/rwl_900+.Rds")
 
+
+
 depth_function <- function(x){
     sum(!is.na(x))
 }
@@ -144,13 +146,13 @@ str(d_ggplot_2_gathered)
 pplot <- ggplot(d_ggplot_2_gathered, aes(x=Time))
 pplot + geom_line(aes(y=Values, group=Est_Mean_Method, color=factor(Est_Mean_Method, labels=c("Warren (1980)", "Polynomial of order 2")),
                       linetype=factor(Est_Mean_Method, labels=c("Warren (1980)", "Polynomial of order 2")))) +
-  geom_line(aes(y=Width), color="blue") +
-  scale_color_manual(values=c("black", "green")) +
-  ggtitle("Estimated means by the method of Warren (1980) \n and by a polynomial of order 2")  +
-  theme(plot.title = element_text(hjust=0.5), legend.position = "top") +
-  xlab("Time") + ylab("Tree ring width (1/100 mm)") +
-  labs(color = "Methods") +
-  labs(linetype= "Methods")
+    geom_line(aes(y=Width), color="blue") +
+    scale_color_manual(values=c("black", "green")) +
+    ggtitle("Estimated means by the method of Warren (1980) \n and by a polynomial of order 2")  +
+    theme(plot.title = element_text(hjust=0.5), legend.position = "top") +
+    xlab("Time") + ylab("Tree ring width (1/100 mm)") +
+    labs(color = "Methods") +
+    labs(linetype= "Methods")
 
 
 # Variance Stabilisation
@@ -175,12 +177,12 @@ str(d_ggplot_3_gathered)
 pplot <- ggplot(d_ggplot_3_gathered, aes(x=Time))
 pplot + geom_line(aes(y=values, group=y, color=factor(y, labels=c("Warren (1980)", "Polynomial of order 2")),
                       linetype=factor(y, labels=c("Warren (1980)", "Polynomial of order 2")))) +
-  scale_color_manual(values=c("black", "green")) +
-  ggtitle('Residual time series')  +
-  theme(plot.title = element_text(hjust=0.5), legend.position = "top") +
-  xlab("Time") + ylab("Tree ring width (1/100 mm)") +
-  labs(color = "Methods") +
-  labs(linetype="Methods")
+    scale_color_manual(values=c("black", "green")) +
+    ggtitle('Residual time series')  +
+    theme(plot.title = element_text(hjust=0.5), legend.position = "top") +
+    xlab("Time") + ylab("Tree ring width (1/100 mm)") +
+    labs(color = "Methods") +
+    labs(linetype="Methods")
 
 
 
@@ -206,12 +208,12 @@ d_ggplot_4_gathered <- d_ggplot_4 %>% gather(y, values, y1:y2)
 pplot <- ggplot(d_ggplot_4_gathered, aes(x=Time))
 pplot + geom_line(aes(y=values, group=y, color=factor(y, labels=c("Warren (1980)", "Polynomial of order 2")),
                       linetype=factor(y, labels=c("Warren (1980)", "Polynomial of order 2")))) +
-  scale_color_manual(values=c("black", "green")) +
-  ggtitle('Transformed residuals')  +
-  theme(plot.title = element_text(hjust=0.5), legend.position = "top") +
-  xlab("Time") + ylab("Tree ring width (1/100 mm)") +
-  labs(color = "Methods") +
-  labs(linetype= "Methods")
+    scale_color_manual(values=c("black", "green")) +
+    ggtitle('Transformed residuals')  +
+    theme(plot.title = element_text(hjust=0.5), legend.position = "top") +
+    xlab("Time") + ylab("Tree ring width (1/100 mm)") +
+    labs(color = "Methods") +
+    labs(linetype= "Methods")
 
 
 # Acf and Pacf
@@ -300,12 +302,12 @@ d_ggplot_5_gathered <- d_ggplot_6%>% gather(y, Values, y1:y2)
 pplot <- ggplot(d_ggplot_5_gathered, aes(x=Time))
 pplot + geom_line(aes(y=Values, group=y,
                       color=factor(y, labels=c("After power transformation", "After power transformation and linear trend")))) +
-  scale_color_manual(values=c("blue", "green")) +
-  ggtitle('Residual time series')  +
-  theme(plot.title = element_text(hjust=0.5), legend.position = "top") +
-  xlab("Time") + ylab("Tree ring width (1/100 mm)") +
-  labs(color = "Methods") +
-  labs(linetype="Methods")
+    scale_color_manual(values=c("blue", "green")) +
+    ggtitle('Residual time series')  +
+    theme(plot.title = element_text(hjust=0.5), legend.position = "top") +
+    xlab("Time") + ylab("Tree ring width (1/100 mm)") +
+    labs(color = "Methods") +
+    labs(linetype="Methods")
 
 ggAcf(R_transformed_centered, main="ACF plot after a power transformation and subtracting a linear trend")
 ggPacf(R_transformed_centered, main="PACF plot after a power transformation and subtracting a linear trend")
@@ -393,16 +395,24 @@ arma11.phi <- Xt.arma11$model$phi
 arma11.phi.causal <- abs( polyroot(c(1,-arma11.phi)))
 arma11.theta <- Xt.arma11$model$theta
 arma11.sigma2 <- Xt.arma11$sigma2
+arma11_resids <- cbind(year=t,residuals=Xt.arma11$residuals/sd(Xt.arma11$residuals),model=rep("ARMA(1,1)",times=length(t)))
+#arma11_box <- Box.test(Xt.arma11$residuals),lag=20,type = "Ljung-Box")
 
 Xt.ar1 <- arima(x=Xt,order=c(1,0,0),include.mean = F)
 ar1.phi <- Xt.ar1$model$phi
 ar1.phi.causal <- abs( polyroot(c(1,-ar1.phi)))
 ar1.sigma2 <- Xt.ar1$sigma2
+ar1_resids <- cbind(year=t,residuals=Xt.ar1$residuals/sd(Xt.ar1$residuals),model=rep("AR(1)",times=length(t)))
+
 
 Xt.ar2 <- arima(x=Xt,order=c(2,0,0),include.mean = F)
 ar2.phi <- Xt.ar2$model$phi
 ar2.phi.causal <- abs( polyroot(c(1,-ar2.phi)))
 ar2.sigma2 <- Xt.ar2$sigma2
+ar2_resids <- cbind(year=t,residuals=Xt.ar2$residuals/sd(Xt.ar2$residuals),rep("AR(2)",times=length(t)))
+
+model_aic_compared <- data.frame(Model=c("ARMA(1,1)","AR(1)","AR(2)"),
+                                 AIC=c(Xt.arma11$aic,Xt.ar1$aic,Xt.ar2$aic))
 
 #modelnames <- c(rep("ARMA(1,1)",times=3),rep("AR(1",times=2))
 paramnames <- c("$\\phi$","$\\theta$","$\\sigma^2_{ARMA(1,1)}$","$\\phi$","$\\sigma^2_{AR(1)}$","$\\phi_1$","$\\phi_2$","$\\sigma^2_{AR(2)}$")
@@ -412,3 +422,75 @@ se <- c(round(sqrt(diag(Xt.arma11$var.coef)),digits=3),"-",round(sqrt(diag(Xt.ar
 
 modelComparisonTable <- data.frame(paramnames,parameters,se)
 colnames(modelComparisonTable) <- c("Parameter name", "Parameter value", "standard error")
+
+# Compare ACF for all models
+
+acf_arma11 <- acf(Xt.arma11$residuals, type="correlation",plot=F)
+acf_arma11 <- data.frame(lag=0:26,
+                         acf=acf_arma11$acf,
+                         model=rep("ARMA(1,1)",times=27))
+acf_ar1 <- acf(Xt.ar1$residuals, type="correlation",plot=F)
+acf_ar1 <- data.frame(lag=0:26,
+                         acf=acf_ar1$acf,
+                         model=rep("AR(1)",times=27))
+acf_ar2 <- acf(Xt.ar2$residuals, type="correlation",plot=F)
+acf_ar2 <- data.frame(lag=0:26,
+                         acf=acf_ar2$acf,
+                         model=rep("AR(2)",times=27))
+
+acf_comparison_df <- rbind(
+    acf_arma11,
+    acf_ar1,
+    acf_ar2
+)
+
+acf_comparison_df$lag <- as.factor(acf_comparison_df$lag)
+
+acf_comparison_plot <- ggplot(acf_comparison_df,aes(x=lag,y=acf,fill=model)) +
+    geom_bar(position="dodge", stat="identity") +
+    geom_hline(yintercept=c(-1.96/sqrt(400),1.96/sqrt(400))) +
+    ylab("ACF")
+
+# Compare standardized residuals of all models
+residuals_df <- as.data.frame(rbind(arma11_resids,ar1_resids,ar2_resids))
+residuals_df$year <- as.numeric(levels(residuals_df$year)[residuals_df$year])
+residuals_df$residuals <- as.numeric(levels(residuals_df$residuals)[residuals_df$residuals])
+
+
+residuals_plot <- ggplot(residuals_df, aes(x=year,y=residuals,colour=model)) +
+    geom_line()
+
+# Compare Box-test for all models
+
+boxtest_df <- data.frame()
+
+for(l in 1:10){
+    if(l>2){
+        boxtest_df <- rbind(boxtest_df,
+                            data.frame(lag=l,
+                                          pvalue=Box.test(Xt.arma11$residuals,lag=l,type="Ljung-Box",fitdf = 2)$p.value,
+                                          model="ARMA(1,1)"))
+        boxtest_df <- rbind(boxtest_df,
+                            data.frame(lag=l,
+                                          pvalue=Box.test(Xt.ar2$residuals,lag=l,type="Ljung-Box",fitdf = 2)$p.value,
+                                          model="AR(2)"))
+    }
+    if(l>1){
+        if(nrow(boxtest_df) == 0){
+        boxtest_df <- data.frame(lag=l,
+                                          pvalue = Box.test(Xt.ar1$residuals,lag=l,type="Ljung-Box",fitdf = 1)$p.value,
+                                          model="AR(1)")
+        } else {
+            boxtest_df <- rbind(boxtest_df, data.frame(lag=l,
+                                        pvalue = Box.test(Xt.ar1$residuals,lag=l,type="Ljung-Box",fitdf = 1)$p.value,
+                                        model="AR(1)"))
+
+        }
+    }
+}
+colnames(boxtest_df) <- c("lag", "pvalue", "model")
+
+boxtest_plot <- ggplot(boxtest_df, aes(x=lag,y=pvalue,colour=model)) +
+    geom_point() +
+    geom_hline(yintercept=0.05) +
+    ylab("p value")
