@@ -1,17 +1,19 @@
+\clearpage
+
 # Introduction and Goal
 
 <!-- In this project, a dendrochronology was analysed. -->
 
-Dendrochronology, i.e. the method to date tree rings, is used in several fields of Science. One relevant application for the method is in Archeology where the method helps to date (wooden) artifacts. In Climate Science dated tree ring data are one method of choice to learn about the climate of the past. Tree ring chronologies also help to backdate the radiocarbon concentration, which is used in radiocarbon calibration - another method for dating artifacts.
+Dendrochronology, i.e. the method to date tree rings, is used in several fields of science. One relevant application for the method is in archeology where the method helps to date (wooden) artifacts. In climate science, dated tree ring data are one method of choice to learn about the climate of the past. Tree ring chronologies also help to backdate the radiocarbon concentration, which is used in radiocarbon calibration - another method for dating artifacts.
 
 <!-- https://www.environmentalscience.org/dendrochronology-tree-rings-tell-us -->
 <!-- https://c14.arch.ox.ac.uk/calibration.html -->
 
-Usually, time series in Dendrochnology last several years. Such long time series can be constructed by merging and overlaying several shorter lasting time series from individual trees. By taking the mean a single continuous series of yearly ring widhts is finally built. Chronologies are generally constructed for defined geographical regions as the environment (i.e the local climate, soil properties and terrain) has substantial impact on the growth of trees [@baillie2012slice].  
+Usually, time series in dendrochnology span several hundred years. Such long time series can be constructed by merging and overlaying several shorter lasting time series from individual trees. By taking the mean of yearly ring widths, a single continuous series is finally built. Chronologies are generally constructed for defined geographical regions as the environment (i.e the local climate, soil properties and terrain) has substantial impact on the growth of trees [@baillie2012slice].  
 
-From the perspective of Statistics, tree ring data are interesting because they define a time series. According to @woollons1990time and @FOX2001261 ${AR}(1)$ and ${ARMA}(1,1)$ are very popular choices for the time series process after having removed the trend. ${AR(2)}$ can be seen as a good choice as well (see e.g. @dplR). 
+From the perspective of statistics, tree ring data are interesting because they define a time series. According to @woollons1990time and @FOX2001261 {AR}(1) and {ARMA}(1,1) are very popular choices for the time series process after having removed the trend. {AR(2)} can be seen as a good choice as well (see e.g. @dplR). 
 
-In this paper we are primarly interesting in imputing one missing value given that all other observarions are known. By doing so, our contribution is twofold. Firstly, we give evidence about the process of Swiss dendrochonolgies from the Bernese Oberland. Secondly, we give an insight, how well different imputation methods work.     
+The interest of this report lies primarily in imputing one missing value given that all other observarions are known. By doing so, the contribution is twofold. Firstly, evidence about the process of Swiss dendrochonolgies from the Bernese Oberland is given. Secondly, an insight into how well different imputation methods work is gained.     
 
 <!-- by measuring the patterns of tree ring widths from individual wooden artifacts, then overlaying the data with other measured artifacts to build up a continuous series of yearly mean ring widths spanning hundreds to thousands of years. Newly measured artifacts are matched to existing, dated chronologies serving the double purpose of strengthening the chronology and dating the artifact in question.  -->
 
@@ -24,41 +26,58 @@ In this paper we are primarly interesting in imputing one missing value given th
 
 <!-- The project team investigated several approaches to obtain a stationary time series. Once this was achieved, we fitted the most likely processes mentioned above and compared three different imputation approaches in terms of best prediction of randomly selected missing values in the series. -->
 
-# Methods
+# Methods {#methods}
 
-In 'classical' time series analysis a times series of interest needs to stationary. If it is not, it has to be transformed so that the resulting series is stationary. In section 2.1 (REFERENCES ARE STILL HARD CODED) we will take a closer look at two methods proposed in the Dendrochronology literature as transformation. We will also present our 'own' method which in our opinion worked best on the dataset we use (see section XX for a discussiom of the results). In section 2.2 we shortly discuss how the best model can be found. In section 2.3 we give a short introduction about *Kalman Smoothing* and how we can use this method to impute missing values. Section 2.4 shows how the transformed series can be transformed back.   
+In 'classical' time series analysis a times series of interest needs to be stationary. If it is not, it has to be transformed so that the resulting series is stationary. In  [section 2.1](#transformations) we will take a closer look at two methods proposed in the Dendrochronology literature as transformation. We will also present our 'own' method which in our opinion worked best on the dataset we use (see section XX for a discussiom of the results). In section 2.2 we shortly discuss how the best model can be found. In section 2.3 we give a short introduction about *Kalman Smoothing* and how we can use this method to impute missing values. Section 2.4 shows how the transformed series can be transformed back.   
 
-## Transformations to achieve stationarity
+## Transformations to achieve stationarity {#transformations}
 
-lorem ipsum
+After evaluating different approaches, it was found that a combination of scaling, log transformation and linear trend yielded the best result. Power transformation (section (#powboxcox)) and an exponential method (section(#woollons)) did not produce stationary series.
 
-### Power transformation / Box-Cox transformation:
-These methods are related and aimed to stabilize variance in a model-independent manner, i.e. irrespective of the time series process that is deduced from the resulting stationary series. The methods work by finding the transformation index $\lambda$ that minimizes the coefficient of variation of the series [@box1976time]. In short, [@guerrero2004] suggests dividing the time series into $H\geq2$ equal-sized subseries, computing mean $\bar{Z_h}$ and standard deviation $S_h$ for each subseries and then search for $\lambda$ such that $\frac{S_h}{\bar{Z}^{1-\lambda}_h}=c ; h=1,...H$ where $c>0$ is a constant value.
+The methods will be discussed briefly in the following sections.
 
-EVTL. BRUCH NEBENEINANDER
+### Power transformation / Box-Cox transformation {#powboxcox}
 
-### Woollons (1990)
+Both these methods aim to find some exponent $\lambda$ s.t. the variance of a series is stabilized.
+
+The Box-Cox transformation aims to stabilize variance by finding the transformation index $\lambda$ that minimizes the coefficient of variation of the series [@box1976time]. This method was proposed to not only validate the constant variance assumption for models of the ARIMA family, but all other underlying assumptions as well by estimating both $\lambda$ and the model parameters in a combined way.
+
+Another approach is the power transformation proposed by @guerrero2004. In short, he aims to estimate $\lambda$ in a model-independent manner, i.e. irrespective of the time series process that is deduced from the resulting stationary series. In short, he suggests dividing the time series into $H\geq2$ equal-sized subseries, computing mean $\bar{Z_h}$ and standard deviation $S_h$ for each subseries and then search for $\lambda$ such that $S_h/\bar{Z}^{1-\lambda}_h=c ; h=1,...H$ where $c>0$ is a constant value.
+
+### Woollons (1990) {#woollons}
 The method proposes to initially detrend the data by fitting a polynomial, then dividing the residuals by the fitted values  [see @woollons1990time]. To summarise, the proposed approach is an estimate of the form $Y = \alpha t^{\beta} e^{\delta t}$. Taking the log on both sides results in a linear model.
 
-### Log transformation & linear trend
-This approach was considered on intuitive grounds and was inspired by information given in the accompanying lecture. Variance stabilisation was tackled by the transformation $\frac{\bar{r}_t}{sd_t},t=1400,...,1800$, followed by fitting a first-order trend on the log-transformed and variance-stabilized series.
+### Log transformation & linear trend {#logtrans}
+This approach was considered on intuitive grounds and was inspired by information given in the accompanying lecture. The steps involved were:
 
-SAY THAT LAST APPROACH IS BEST
+1. Scaling, i.e. dividing the yearly means by the yearly standard deviation: $B_t = \frac{\bar{r}_t}{sd_t}$
+2. Log tranformation: $C_t = log(B_t)$
+3. Fitting a linear model of order 1: $X_t = \beta_0 + \beta_1*C_t$
 
 ## Model fitting
 
-Shortly discuss, how to use ACF and PACF to choose the model. 
-Shortly discuss how autofit or auto.arima find the best model: AIC
+The ACF and PACF plots for the obtained stationary series were studied to gain an initial intuition about possible time series models. Table \ref{tab:acfpacfdecision} shows the decision matrix that was considered. Candidates were then fitted and the residuals analysed graphically by creating plots for standardized residuals, ACF and Ljung-Box test results.
 
-We used `itsmr::autofit()` to identify the best fitting model. Candidates were then analysed graphically and assessed.
+```{r acfpacfdecision}
+apdec <- data.frame(rbind(c("exponential decrease", "p spikes"),
+                       c("q spikes", "exponential decrease"),
+                       c("exponential decrease", "exponential decrease")),
+                    row.names = c("AR(p)","MA(q)","ARMA(p,q)"))
+colnames(apdec) = c("ACF","PACF")
+kable(apdec,booktabs=T,
+      caption="Decision matrix for model identification from ACF and PACF plots.") %>%
+    kable_styling(latex_options = c("hold_position"), position = "center")
+```
+
+In order to identify the best model, `itsmr::autofit()` was used [@itsmr].  Autofit computes different models in a user-specified range of $p,q$ parameter combinations. The models are compared using the $AIC$ as a measure , the model with the minimal $AIC$ being selected.
 
 ## Imputations
 
-Since our goal is to impute one missing value knowing all observations occuring before and after, simply forecasting the value based on observations in the past is not enough. Luckily, a well known method called Kalman smoothing can be used. *Kalman Smoothing* as well as *Kalman Filtering* are used in the context of state-space models. State-space models describe the situation where the observed value $y$ is the function of a state variable $x$ and noise. Assuming Gaussian noise for the state and observation equation as well as for the distribution of the initial state, allows to calculate the distribution of the state at any time t within the series. Let be $p(x_t|y_{1:l})$ the marginal posterior distribution of the state. As definied in @briers2010smoothing, $l<t$ is associated with *predicting*, $l=t$ with *filtering*, and $l>t$ with *smoothing*. 
+Since the goal was to impute one missing value knowing all observations occurring before and after, simply forecasting the value based on observations in the past is not enough. Luckily, a well known method called Kalman smoothing can be used. *Kalman smoothing* as well as *Kalman filtering* are used in the context of state-space models. State-space models describe the situation where the observed value $y$ is the function of a state variable $x$ and noise. Assuming Gaussian noise for the state and observation equation as well as for the distribution of the initial state, allows to calculate the distribution of the state at any time t within the series. Let be $p(x_t|y_{1:l})$ the marginal posterior distribution of the state. As definied in @briers2010smoothing, $l<t$ is associated with *predicting*, $l=t$ with *filtering*, and $l>t$ with *smoothing*. 
 
-Our approach consists of defining the processes of the transformed time series, i.e. $AR(1)$, $AR(2)$ and $ARMA(1,1)$ in state-space form and then estimate the parameters to finally be able to smooth the states. The implementation is done with the `dlm` package in R (@petris2009dlm) and checked with the . Due to the limited space, we refer to @Hyndman how to formulate $AR(1)$, $AR(2)$ and $ARMA(1,1)$ as state-space models. Since we need an estimate of the standard deviation to transform back our series (see section 2.1 and 2.4), we need to come up with and estimate for the standard deviation. An ARMA(1,1) process seems to be best.
+The approach chosen consists of defining the processes of the transformed time series, i.e. $AR(1)$, $AR(2)$ and $ARMA(1,1)$ in state-space form and then estimate the parameters to finally be able to smooth the states. The implementation is done with the `dlm` package in R (@petris2009dlm) and checked with the [MISSING]. Due to the limited space, we refer to @Hyndman on how to formulate $AR(1)$, $AR(2)$ and $ARMA(1,1)$ as state-space models. Since an estimate of the standard deviation is required to back-transform the series (see sections 2.1 and 2.4), an estimate for the standard deviation had to be found. An ARMA(1,1) process seems to be best.
 
-All models are compared to the benchmark where we simply linearly interpolate the original time series. In the section XX (IMPUTATION) we will show that we outperform the benchmark with this approach. 
+All models were compared to the benchmark, simply linearly interpolating the original time series. In the section XX (IMPUTATION) it is shown that the benchmark was outperformed with this approach. 
 
 
 ## Backtransformation

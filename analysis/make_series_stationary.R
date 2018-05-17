@@ -1,5 +1,3 @@
-# getting window of the two series from 1332 to 1800:
-
 library(ggplot2)
 library(tidyr)
 library(dplR)
@@ -9,20 +7,20 @@ library(dlm)
 library(itsmr)
 library(MASS)
 
-#spruce_window <- window(spruce_sup_900_ts,start=1400, end=1800)
+#*******************************************************************************
+# Preparing the time series
+
 raw_rwl <- readRDS("data/rwl_900+.Rds")
-
-
 
 depth_function <- function(x){
     sum(!is.na(x))
 }
+
 rwl_mean <- apply(raw_rwl,1,mean,na.rm=T)
 rwl_sd <- apply(raw_rwl,1,sd,na.rm=T)
 rwl_depth <- apply(rwl_df, 1, depth_function)
 
 rwl_ts <- ts(rwl_mean,end=2017)
-
 rwl_mean_ts <- ts(rwl_mean,end=2017)
 rwl_sd_ts <- ts(rwl_sd,end=2017)
 rwl_depth_ts <- ts(rwl_depth,end=2017)
@@ -46,7 +44,6 @@ seriesMeanPlot <- ggplot(seriesMean, aes(x=year,y=rwl_mean)) +
 # Showing off heteroskedasticity
 heterosk <- lm(seriesMean$rwl_mean~seriesMean$year)
 seriesHeterosk <- as.data.frame(cbind(year,heterosk$residuals))
-
 seriesHeteroskedasticityPlot <- ggplot(seriesHeterosk, aes(x=year,y=V2)) +
     geom_line() +
     ylab("Residuals [1/100 mm]") +
@@ -108,8 +105,6 @@ app_1_trend_1_fit<- exp(m1$fitted.values)
 # ggplot
 d_ggplot_1 <- cbind(Time=t, y1=spruce_window, y2=app_1_trend_1_fit)
 d_ggplot_1 <- as.data.frame(d_ggplot_1)
-
-
 
 pplot <- ggplot(d_ggplot_1, aes(x=Time))
 pplot + geom_line(aes(y=y1), color="blue") +
@@ -200,20 +195,11 @@ temp <- cbind(Time=t, y=m1_i,model=rep("Woollons",times=length(t)))
 data_woollons <- as.data.frame(cbind(Time=t, y=m1_i,model=rep("Woollons",times=length(t))))
 data_p_order2 <- as.data.frame(cbind(Time=t, y=m2_i,model=rep("Polynomial order 2",times=length(t))))
 
-# ggplot
+# data for ggplot
 d_ggplot_4 <- cbind(Time=t, y1=m1_i, y2=m2_i)
 d_ggplot_4 <- as.data.frame(d_ggplot_4)
 d_ggplot_4_gathered <- d_ggplot_4 %>% gather(y, values, y1:y2)
 
-pplot <- ggplot(d_ggplot_4_gathered, aes(x=Time))
-pplot + geom_line(aes(y=values, group=y, color=factor(y, labels=c("Warren (1980)", "Polynomial of order 2")),
-                      linetype=factor(y, labels=c("Warren (1980)", "Polynomial of order 2")))) +
-    scale_color_manual(values=c("black", "green")) +
-    ggtitle('Transformed residuals')  +
-    theme(plot.title = element_text(hjust=0.5), legend.position = "top") +
-    xlab("Time") + ylab("Tree ring width (1/100 mm)") +
-    labs(color = "Methods") +
-    labs(linetype= "Methods")
 
 
 # Acf and Pacf
@@ -239,12 +225,6 @@ d_ggplot_5 <- as.data.frame(d_ggplot_5)
 data_woollons_sd_stab <- as.data.frame(cbind(Time=t, y=stab_sd_ts,model=rep("Woollons SD stab.",times=length(t))))
 data_woollons_sd_stab$Time <- as.numeric(levels(data_woollons_sd_stab$Time)[data_woollons_sd_stab$Time])
 data_woollons_sd_stab$y <- as.numeric(levels(data_woollons_sd_stab$y)[data_woollons_sd_stab$y])
-
-pplot <- ggplot(d_ggplot_5, aes(x=Time))
-pplot + geom_line(aes(y=y)) +
-    ggtitle('Transformed residuals: Variance stabilisation with SD')  +
-    theme(plot.title = element_text(hjust=0.5), legend.position = "top") +
-    xlab("Time") + ylab("Tree ring width (1/100 mm)")
 
 
 ################################################################################
@@ -342,28 +322,27 @@ spruce_window_log <- log(spruce_window_stab)
 
 t2 <- t^2
 
-m <- lm(spruce_window_log ~ t)
-summary(m)
+order1_model <- lm(spruce_window_log ~ t)
+summary(order1_model)
 
 m2 <- lm(spruce_window_log ~ t+t2)
 summary(m2)
 # Nope, order 1 seems okay.
-plotc(m$residuals)
+plotc(order1_model$residuals)
 
-data_log_order1_varstab <- as.data.frame(cbind(Time=t, y=m$residuals,model=rep("Log trans., order 1",times=length(t))))
+data_log_order1_varstab <- as.data.frame(cbind(Time=t, y=order1_model$residuals,model=rep("Log trans., order 1",times=length(t))))
 data_log_order1_varstab$Time <- as.numeric(levels(data_log_order1_varstab$Time)[data_log_order1_varstab$Time])
 data_log_order1_varstab$y <- as.numeric(levels(data_log_order1_varstab$y)[data_log_order1_varstab$y])
 
 
 
-################################################################################
+#*******************************************************************************
 # Overview plots
 
 # woollons
 stationarity_woollons_plot <- ggplot(data_woollons_sd_stab,aes(x=Time,y=y)) +
     geom_line(size=0.5) +
     ylab("")
-
 
 # power transformation & box-cox
 data_powerbox <- rbind(data_powertrans_centered,
@@ -372,125 +351,9 @@ data_powerbox$Time <- as.numeric(levels(data_powerbox$Time)[data_powerbox$Time])
 data_powerbox$y <- as.numeric(levels(data_powerbox$y)[data_powerbox$y])
 stationarity_powerbox_plot <- ggplot(data_powerbox,aes(x=Time,y=y,colour=method)) +
     geom_line(size=0.5) +
-    ylab("")
+    ylab("") +
+    theme(legend.justification=c(1,1), legend.position=c(1,1))
 
-stationarity_data_log_order1_varstab <- ggplot(data_log_order1_varstab,aes(x=Time,y=y)) +
+stationaritylog_order1_plot <- ggplot(data_log_order1_varstab,aes(x=Time,y=y)) +
     geom_line(size=0.5) +
-    ylab("")
-
-###############################################################################
-# Model identification
-
-Xt <- m$residuals
-Xt.bar <- mean(Xt)
-Box.test(x=Xt,lag=20,type="Ljung-Box")
-
-
-
-
-Xt.autofit <- autofit(x=Xt,p=1:3,q=0:3) # ARMA(1,1) was found.
-
-Xt.arma11 <- arima(x=Xt,order=c(1,0,1),include.mean = F)
-arma11.phi <- Xt.arma11$model$phi
-arma11.phi.causal <- abs( polyroot(c(1,-arma11.phi)))
-arma11.theta <- Xt.arma11$model$theta
-arma11.sigma2 <- Xt.arma11$sigma2
-arma11_resids <- cbind(year=t,residuals=Xt.arma11$residuals/sd(Xt.arma11$residuals),model=rep("ARMA(1,1)",times=length(t)))
-#arma11_box <- Box.test(Xt.arma11$residuals),lag=20,type = "Ljung-Box")
-
-Xt.ar1 <- arima(x=Xt,order=c(1,0,0),include.mean = F)
-ar1.phi <- Xt.ar1$model$phi
-ar1.phi.causal <- abs( polyroot(c(1,-ar1.phi)))
-ar1.sigma2 <- Xt.ar1$sigma2
-ar1_resids <- cbind(year=t,residuals=Xt.ar1$residuals/sd(Xt.ar1$residuals),model=rep("AR(1)",times=length(t)))
-
-
-Xt.ar2 <- arima(x=Xt,order=c(2,0,0),include.mean = F)
-ar2.phi <- Xt.ar2$model$phi
-ar2.phi.causal <- abs( polyroot(c(1,-ar2.phi)))
-ar2.sigma2 <- Xt.ar2$sigma2
-ar2_resids <- cbind(year=t,residuals=Xt.ar2$residuals/sd(Xt.ar2$residuals),rep("AR(2)",times=length(t)))
-
-model_aic_compared <- data.frame(Model=c("ARMA(1,1)","AR(1)","AR(2)"),
-                                 AIC=c(Xt.arma11$aic,Xt.ar1$aic,Xt.ar2$aic))
-
-#modelnames <- c(rep("ARMA(1,1)",times=3),rep("AR(1",times=2))
-paramnames <- c("$\\phi$","$\\theta$","$\\sigma^2_{ARMA(1,1)}$","$\\phi$","$\\sigma^2_{AR(1)}$","$\\phi_1$","$\\phi_2$","$\\sigma^2_{AR(2)}$")
-parameters <- round(c(arma11.phi,arma11.theta,arma11.sigma2,ar1.phi,ar1.sigma2,ar2.phi,ar2.sigma2),digits=3)
-
-se <- c(round(sqrt(diag(Xt.arma11$var.coef)),digits=3),"-",round(sqrt(diag(Xt.ar1$var.coef)),digits=3),"-",round(sqrt(diag(Xt.ar2$var.coef)),digits=3),"-")
-
-modelComparisonTable <- data.frame(paramnames,parameters,se)
-colnames(modelComparisonTable) <- c("Parameter name", "Parameter value", "standard error")
-
-# Compare ACF for all models
-
-acf_arma11 <- acf(Xt.arma11$residuals, type="correlation",plot=F)
-acf_arma11 <- data.frame(lag=0:26,
-                         acf=acf_arma11$acf,
-                         model=rep("ARMA(1,1)",times=27))
-acf_ar1 <- acf(Xt.ar1$residuals, type="correlation",plot=F)
-acf_ar1 <- data.frame(lag=0:26,
-                         acf=acf_ar1$acf,
-                         model=rep("AR(1)",times=27))
-acf_ar2 <- acf(Xt.ar2$residuals, type="correlation",plot=F)
-acf_ar2 <- data.frame(lag=0:26,
-                         acf=acf_ar2$acf,
-                         model=rep("AR(2)",times=27))
-
-acf_comparison_df <- rbind(
-    acf_arma11,
-    acf_ar1,
-    acf_ar2
-)
-
-acf_comparison_df$lag <- as.factor(acf_comparison_df$lag)
-
-acf_comparison_plot <- ggplot(acf_comparison_df,aes(x=lag,y=acf,fill=model)) +
-    geom_bar(position="dodge", stat="identity") +
-    geom_hline(yintercept=c(-1.96/sqrt(400),1.96/sqrt(400))) +
-    ylab("ACF")
-
-# Compare standardized residuals of all models
-residuals_df <- as.data.frame(rbind(arma11_resids,ar1_resids,ar2_resids))
-residuals_df$year <- as.numeric(levels(residuals_df$year)[residuals_df$year])
-residuals_df$residuals <- as.numeric(levels(residuals_df$residuals)[residuals_df$residuals])
-
-
-residuals_plot <- ggplot(residuals_df, aes(x=year,y=residuals,colour=model)) +
-    geom_line()
-
-# Compare Box-test for all models
-
-boxtest_df <- data.frame()
-
-for(l in 1:10){
-    if(l>2){
-        boxtest_df <- rbind(boxtest_df,
-                            data.frame(lag=l,
-                                          pvalue=Box.test(Xt.arma11$residuals,lag=l,type="Ljung-Box",fitdf = 2)$p.value,
-                                          model="ARMA(1,1)"))
-        boxtest_df <- rbind(boxtest_df,
-                            data.frame(lag=l,
-                                          pvalue=Box.test(Xt.ar2$residuals,lag=l,type="Ljung-Box",fitdf = 2)$p.value,
-                                          model="AR(2)"))
-    }
-    if(l>1){
-        if(nrow(boxtest_df) == 0){
-        boxtest_df <- data.frame(lag=l,
-                                          pvalue = Box.test(Xt.ar1$residuals,lag=l,type="Ljung-Box",fitdf = 1)$p.value,
-                                          model="AR(1)")
-        } else {
-            boxtest_df <- rbind(boxtest_df, data.frame(lag=l,
-                                        pvalue = Box.test(Xt.ar1$residuals,lag=l,type="Ljung-Box",fitdf = 1)$p.value,
-                                        model="AR(1)"))
-
-        }
-    }
-}
-colnames(boxtest_df) <- c("lag", "pvalue", "model")
-
-boxtest_plot <- ggplot(boxtest_df, aes(x=lag,y=pvalue,colour=model)) +
-    geom_point() +
-    geom_hline(yintercept=0.05) +
-    ylab("p value")
+    ylab("Scaled, log tranformed values [-]")

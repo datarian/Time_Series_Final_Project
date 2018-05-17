@@ -1,6 +1,6 @@
 library(ggplot2)
 
-ggplot2::theme_set(ggplot2::theme_bw(base_size = 10))
+ggplot2::theme_set(ggplot2::theme_bw(base_size = 11))
 ggplot2::theme_update(
     plot.background = ggplot2::element_rect(colour="white"),
     plot.title = element_text(hjust = 0.5),
@@ -18,6 +18,7 @@ ggplot2::theme_update(
     strip.background = ggplot2::element_rect(colour="black", fill="white"),
     legend.key = ggplot2::element_rect(colour="white", size = 0.3),
     legend.title = ggplot2::element_blank(),
+    legend.position = "bottom",
     aspect.ratio = 0.618
 )
 

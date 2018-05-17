@@ -1,32 +1,18 @@
 # Modelling / Analysis
 
-## Transformation
-
-For the stationary series used as a basis for further analysis, the original series was transformed by scaling, i.e. through dividing the yearly mean ring width $\bar{r}_t$ by the standard deviation of yearly ring widths of all measured trees, $sd_t$.
-
-
-
 ## Achieving stationarity
 
-We decided to use the series obtained through a scaling transformation, followed by log-transformation and then order-1 trend removal. The three approaches studied yielded very different results, as can be observed in figure \ref{fig:stationarity_alternatives}.
+It was decided to use the series obtained through the intuitive approach described in section [2.1.3](#logtrans). The series is mean-centered and shows a relatively constant variance. A weak stationarity can therefore be assumed (see figure  \ref{fig:stationarity_alternatives}). The ACF and PACF for this stationary series (see figure \ref{fig:acfpacf_chosen}), gave further evidence for a usable result.
 
-The top plot shows the series that was used for further analyis. The series is mean-centered and shows a relatively constant variance. A weak stationarity can be assumed. The method proposed by @woollons1990time had much larger variance. Power transform and Box-Cox transform shown at the bottom are effectively the inverse of each other.
+The results of the other two approaches were not satisfactory. These results are not shown in the report for the sake of brevity.
 
-```{r stationarity_alternatives, fig.cap="Comparison of different methods to achieve a stationary time series. Top: log-transformed with order-1 trend removal, middle: Woollons method., bottom: power transform and box-cox transform", out.width="0.8\\linewidth"}
-library(gtable)
-library(grid)
-library(ggplot2)
-library(egg)
-
-grid.draw(ggarrange(stationarity_data_log_order1_varstab,
-             stationarity_woollons_plot,
-             stationarity_powerbox_plot, nrow=3))
-
+```{r stationarity_alternatives, fig.cap="Stationary time series obtained throgh scaling, log-transformation and order-1 trend removal,unitless."}
+stationaritylog_order1_plot
 ```
 
 ## Model selection
 
-The ACF and PACF plots of the stationary series are shown in figure \ref{fig:acfpacf_chosen}. The shape of the ACF and PACF give some basis to argue for either an AR(1) or ARMA(1,1) process.
+The shape of the ACF and PACF (figure \ref{fig:acfpacf_chosen}) give some basis to argue for either an AR(1) or ARMA(1,1) process (also refer to the decision matrix in table \ref{tab:acfpacfdecision}).
 
 ```{r acfpacf_chosen, fig.cap="ACF (left) and PACF (right) of the chosen stationary time series."}
 acf <- ggAcf(data_log_order1_varstab$y, main="") +
@@ -49,35 +35,29 @@ The parameters for all models are significant, as can be seen by comparing their
 ```{r modelcomp}
 kable(modelComparisonTable, booktabs=T,
       caption="Model parameters for ARMA(1,1) and AR(1).",
-      escape=FALSE) %>%
+      escape=FALSE,
+      row.names = FALSE) %>%
     kable_styling(latex_options = c("hold_position"), position = "center") %>%
-    group_rows("ARMA(1,1)",1,3) %>%
-    group_rows("AR(1)",4,5) %>%
-    group_rows("AR(2)",6,8)
+    column_spec(1,bold=T)%>%
+    collapse_rows(columns=c(1),headers_to_remove=c(1), latex_hline = "custom", custom_latex_hline = 1)
 ```
 
-The validity of all models was assessed graphically by plotting the standardized residuals, residual ACF and Ljung-Box test for independence for all three models combined.
+The validity of all models was assessed graphically by plotting the standardized residuals, residual ACF and Ljung-Box test for independence for all three models combined (see figure \ref{fig:tsdiag}).
 
-For the ARMA(1,1) model, the residuals are confirmed to be white noise (see \ref{fig:tsdiag}. The Ljung-box statistic for various lags showed that for the AR(1) and AR(2) model, the residuals are not white noise (see \ref{fig:tsdiag.ar1}, which is also evident from the ACF, which shows some dependency is left.
+For the ARMA(1,1) model, the residuals are confirmed to be white noise (see again figure \ref{fig:tsdiag}). The Ljung-box statistic for various lags showed that for the AR(1) and AR(2) model, the residuals are not white noise (see \ref{fig:tsdiag.ar1}, which is also evident from the ACF, which shows that some dependency is left (too many values are outside of the 95%-bounds).
 
-```{r tsdiag, fig.cap="Diagnostic plots for ARMA(1,1), AR(1) and AR(2). Top: Standardized residuals, middle: ACF, bottom: Ljung-Box test", fig.asp=1.5, out.width="0.5\\linewidth"}
-grid.arrange(
-    residuals_plot,
+```{r tsdiag, fig.cap="Diagnostic plots for ARMA(1,1), AR(1) and AR(2). Top: Standardized residuals, middle: ACF, bottom: Ljung-Box test",fig.width=12,fig.asp=0.618,out.width="0.7\\linewidth"}
+grid.draw(ggarrange(residuals_plot,
     acf_comparison_plot,
     boxtest_plot,
-    ncol=1
-)
-```
+    ncol=1))
 
-```{r tsdiagar1, fig.cap="Diagnostic plots for AR(1).", fig.asp=1.5, out.width="0.5\\linewidth"}
-tsdiag(Xt.ar1)
 ```
-
 
 ## Imputation
 
-- Introduce missing values
+The results of the imputation can be seen in \ref{fig:imputationcomparison}.
 
-- imputation using different strategies
-
-- discussion of imputation results
+```{r imputationcomparison, fig.cap="Comparison of imputed values obtained through different methods."}
+pplot_comparison
+```

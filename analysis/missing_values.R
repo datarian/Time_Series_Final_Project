@@ -4,13 +4,8 @@
 
 ################################################################################
 
-rm(list = ls())
-
 library(forecast)
 library(matrixcalc)
-
-source("analysis/prepare_individual_series.R")
-source("analysis//make_series_stationary.R")
 
 # Goal and Approach
 ################################################################################
@@ -661,10 +656,9 @@ data_NA_removed <- data[!is.na(data$Values),]
 tail(data_NA_removed)
 
 pplot_comparison <- ggplot(data, aes(y=Values, x=Time, group=Method))
-pplot_comparison + geom_line(aes(col=Method), alpha = 1) +
+pplot_comparison <- pplot_comparison + geom_line(aes(col=Method), alpha = 1) +
     scale_color_manual(values=c("blue", "green", "purple", "red", "black")) +
     scale_linetype_manual(values=c("solid", "solid", "solid", "solid", "solid")) +
-    labs(title="Imputed values") +
     theme(legend.position="bottom",
           plot.title = element_text(face="bold", hjust=0.5)) +
     geom_vline(xintercept = t[impute_idx], col="grey")
