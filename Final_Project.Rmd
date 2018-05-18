@@ -17,7 +17,7 @@ output:
         fig_width: 7
         keep_tex: yes
         latex_engine: xelatex
-abstract: "A dendrochronology of wooden buildings in the Bernese Oberland was investigated using methods of time series analysis. A stationary series was obtained through a combination of scaling, log-transformation and linear trend removal. Several possible models were identified, both from literature clues and the graphical interpretation of the data. For these models, the performance of 4 imputation strategies was investigated and the results compared. It could be demonstrated that state-space approaches were superior to simple linear interpolation."
+abstract: "A dendrochronology compiled using samples taken from wooden buildings in the Bernese Oberland was investigated using methods of time series analysis. A stationary series was obtained through a combination of scaling, log-transformation and linear trend removal. Several possible models were identified, both from literature clues and the graphical interpretation of the data. For these models, the performance of 4 imputation strategies was investigated and the results compared. It could be demonstrated that state-space approaches were superior to simple linear interpolation."
 ---
 
 ```{r setup, include=FALSE,cache.vars="rwl_df"}
@@ -59,6 +59,7 @@ library(gridExtra)
 library(knitr)
 library(kableExtra)
 library(egg)
+library(ggpubr)
 
 # Source plot defaults and the complete analysis:
 source("latex/plotDefaults.R")
