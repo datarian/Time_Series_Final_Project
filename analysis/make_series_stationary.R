@@ -320,15 +320,12 @@ pacf(spruce_window_boxcox)
 spruce_window_stab <- spruce_window/rwl_sd_window
 spruce_window_log <- log(spruce_window_stab)
 
-t2 <- t^2
 
 order1_model <- lm(spruce_window_log ~ t)
 summary(order1_model)
 
-m2 <- lm(spruce_window_log ~ t+t2)
-summary(m2)
-# Nope, order 1 seems okay.
-plotc(order1_model$residuals)
+order1_exog_model <- lm(log(spruce_window_stab)~t+rwl_depth_window)
+order1_exog_model
 
 data_log_order1_varstab <- as.data.frame(cbind(Time=t, y=order1_model$residuals,model=rep("Log trans., order 1",times=length(t))))
 data_log_order1_varstab$Time <- as.numeric(levels(data_log_order1_varstab$Time)[data_log_order1_varstab$Time])
@@ -355,9 +352,9 @@ stationarity_powerbox_plot <- ggplot(data_powerbox,aes(x=Time,y=y,colour=method)
     theme(legend.justification=c(1,1), legend.position=c(1,1))
 
 stationaritylog_order1_plot <- ggplot(data_log_order1_varstab,aes(x=Time,y=y)) +
-    geom_hline(yintercept = 0,size=0.5)
+    geom_hline(yintercept = 0,size=0.5) +
     geom_line(size=0.5) +
     ylab("Scaled, log tranformed values [-]")
 
-stationarity_qq_plot <- ggplot(data_log_order1_varstab, aes(sample = .resid)) +
+stationarity_qq_plot <- ggplot(data_log_order1_varstab, aes(sample = y)) +
     geom_qq() + stat_qq_line()

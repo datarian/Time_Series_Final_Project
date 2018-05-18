@@ -4,6 +4,7 @@
 # order1_model is the stationary series created in make_series_stationary.R
 
 Xt <- order1_model$residuals
+#Xt <- order1_exog_model$residuals
 Xt.bar <- mean(Xt)
 Box.test(x=Xt,lag=20,type="Ljung-Box")
 
