@@ -355,5 +355,9 @@ stationarity_powerbox_plot <- ggplot(data_powerbox,aes(x=Time,y=y,colour=method)
     theme(legend.justification=c(1,1), legend.position=c(1,1))
 
 stationaritylog_order1_plot <- ggplot(data_log_order1_varstab,aes(x=Time,y=y)) +
+    geom_hline(yintercept = 0,size=0.5)
     geom_line(size=0.5) +
     ylab("Scaled, log tranformed values [-]")
+
+stationarity_qq_plot <- ggplot(data_log_order1_varstab, aes(sample = .resid)) +
+    geom_qq() + stat_qq_line()
