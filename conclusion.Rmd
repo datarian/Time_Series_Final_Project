@@ -1,7 +1,9 @@
 # Discussion & Conclusions
 
-## Stationarity
+## Stationarity & Model identification
 
-Furthermore, we investigated how exogeneous data could be employed to achieve a stationary time series. This investigation was done on a separate time series contained in the R-package 'dplR' [@dplR] and using climatic data originating from the U.S. National Oceanographic and Athmosperic Administration.
+Stationarity was achieved not by a recommended tranformation, but by intuitively applying a series of transformations. The obtained series was good enough to work with. Further improvements could possibly be realized by using exogeneous data to explain more of the variability of the initial data. Since the growth of trees is influenced by many factors (e.g. climate, soil, slope, exposition, forest cultivation), knowledge abouth these factors could be used. The project team had to stop short from investigating in this direction, combining a chronology contained in the R-package `dplr` [@dplR] with climatic data originating from the U.S. National Oceanographic and Athmosperic Administration for the specific location of the chronology's trees.
+
+Finding an ARMA(1,1) model as the best process corresponded well with literature. It was interesting to see that although AR(1) and AR(2) were not found to be good models, the imputation results were still satisfactory.
 
 ## Imputation
