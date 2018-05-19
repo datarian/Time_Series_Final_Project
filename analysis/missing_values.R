@@ -661,7 +661,8 @@ pplot_comparison <- pplot_comparison + geom_line(aes(col=Method), alpha = 1) +
     scale_linetype_manual(values=c("solid", "solid", "solid", "solid", "solid")) +
     theme(legend.position="bottom",
           plot.title = element_text(face="bold", hjust=0.5)) +
-    geom_vline(xintercept = t[impute_idx], col="grey")
+    geom_vline(xintercept = t[impute_idx], col="grey") +
+    labs(y="Width [1/100mm]")
 
 # Summary
 ################################################################################
@@ -669,8 +670,34 @@ pplot_comparison <- pplot_comparison + geom_line(aes(col=Method), alpha = 1) +
 # imputaions of the centered sd in case of assuming an ARMA(1,1) process works
 # slightly better than with our implementation. A reason could be that we have
 # to add some noise to the covariance matrix when implementing the ARMA(1,1) process
-# as state space model so that the dlm package is able to do the cholesky decomposition.
-# The imputeTS package seems to handle this better.
+# as state space model so that the dlm package is able to do the singular value
+# decomposition. The imputeTS package seems to handle this better.
 
 
+# Tables for the Report
+################################################################################
+modelComparisonImputationTable1 <- data.frame(Approach="Transformed",
+                                              AR1=mse_transformed[1],
+                                              AR2=mse_transformed[2],
+                                              ARMA11=mse_transformed[3],
+                                              LinInt=mse_transformed[4])
+modelComparisonImputationTable2 <- rbind(data.frame(Approach="Original. with sd as ARMA11",
+                                                    AR1=mse_back_transformed_sd_arma11[1],
+                                                    AR2=mse_back_transformed_sd_arma11[2],
+                                                    ARMA11=mse_back_transformed_sd_arma11[3],
+                                                    LinInt=mse_back_transformed_sd_arma11[4]),
+                                         data.frame(Approach="Original. with sd lin. int.",
+                                                    AR1=mse_back_transformed_sd_lin_int[1],
+                                                    AR2=mse_back_transformed_sd_lin_int[2],
+                                                    ARMA11=mse_back_transformed_sd_lin_int[3],
+                                                    LinInt=mse_back_transformed_sd_lin_int[4]),
+                                         data.frame(Approach="Original true sd",
+                                                    AR1=mse_back_transformed_sd_true[1],
+                                                    AR2=mse_back_transformed_sd_true[2],
+                                                    ARMA11=mse_back_transformed_sd_true[3],
+                                                    LinInt=mse_back_transformed_sd_true[4])
+)
+
+modelComparisonImputationTable <- rbind(modelComparisonImputationTable1, modelComparisonImputationTable2)
+colnames(modelComparisonImputationTable) <- c("Approach","AR(1)", "AR(2)", "ARMA(1,1)", "Linear Interpolation")
 
