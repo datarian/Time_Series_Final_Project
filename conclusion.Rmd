@@ -1,9 +1,6 @@
-# Discussion & Conclusions
+# Discussion and Conclusion {#discussionandconclusion}
 
-## Stationarity & Model identification
+We achieve stationarity by a -- to our knowledge -- not yet described transformation in the literature with very satisfying results on our dataset. Our results supports the assumption that transformed tree ring time series can be reasonalbly discribed by an ARMA(1,1) process. Furthermore, we show that an ARMA(1,1) process can also be helpful to impute missing values. In particular, we give some evidence that an approach on a ARMA(1,1) process outperfoms simple linear interpolation on the original time series. 
 
-Stationarity was achieved not by a recommended tranformation, but by intuitively applying a series of transformations. The obtained series was good enough to work with. Further improvements could possibly be realized by using exogeneous data to explain more of the variability of the initial data. Since the growth of trees is influenced by many factors (e.g. climate, soil, slope, exposition, forest cultivation), knowledge abouth these factors could be used. The project team had to stop short from investigating in this direction, combining a chronology contained in the R-package `dplr` [@dplR] with climatic data originating from the U.S. National Oceanographic and Athmosperic Administration for the specific location of the chronology's trees.
+In our analysis the shape of the trend, which we use to achieve stationary, is not explained by exogenous variables. However, the growth of trees is likely influenced by many factors as for example the climate, soil, slope, exposition, forest cultivation and others, and it could be very interesting to learn more about these relationship, also in respect of imputing missing values. A preliminary analysis based on a ARMA model with exogeneous variables^[Such models are also called ARMAX in the literature.] from the U.S. National Oceanographic and Athmosperic Administration (NOAA) for Arizona and Arizonian tree ring data from R-package `dplr`, has shown the potential usefulness of such an approach. An unsolvable problem is however the very limited data availability since weather and soil data were not (systematically) collected before 1895. 
 
-Finding an ARMA(1,1) model as the best process corresponded well with literature. It was interesting to see that although AR(1) and AR(2) were not found to be good models, the imputation results were still satisfactory.
-
-## Imputation

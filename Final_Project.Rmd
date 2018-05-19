@@ -1,5 +1,5 @@
 ---
-title: "Dendrochronologies: Dating wooden artifacts"
+title: "Dendrochronologies: Dating wooden artifacts -- Process estimation and missing-data imputations"
 author: "Time Series Analysis"
 date: '`r Sys.Date()`'
 bibliography: final_project.bib
@@ -17,7 +17,7 @@ output:
         fig_width: 7
         keep_tex: yes
         latex_engine: xelatex
-abstract: "A dendrochronology compiled using samples taken from wooden buildings in the Bernese Oberland was investigated using methods of time series analysis. A stationary series was obtained through a combination of scaling, log-transformation and linear trend removal. Several possible models were identified, both from literature clues and the graphical interpretation of the data. For these models, the performance of 4 imputation strategies was investigated and the results compared. It could be demonstrated that state-space approaches were superior to simple linear interpolation."
+abstract: "A dendrochronology compiled using samples taken from wooden buildings in the Bernese Oberland is investigated using methods of time series analysis. A stationary series is obtained through a combination of scaling, log-transformation and linear trend removal. Several possible models are identified and their performance with respect to impute missing data is investigated. We demonstrate that the transformed time series of tree width data is best discribed by an ARMA(1,1) model and that such a model is also superior to simple linear interpolation when used to impute missing values."
 ---
 
 ```{r setup, include=FALSE,cache.vars="rwl_df"}
