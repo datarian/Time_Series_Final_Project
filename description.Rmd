@@ -1,29 +1,18 @@
-# Description
+# Data {#data}
+The dataset used for the analysis is supplied from the the archaeological service of the canton Berne through a personal contact at the dendrology laboratory in Sutz, BE, who also detailed the process of acquiring the samples (see also [@dendroBern]). The chronology comprises 234 tree ring sequences from different buildings in the Bernese Oberland that are all located above 900 meters. Typically, the wooden structure of old buildings is sampled by boring the beams. The drilling core is then analyzed by microscopy to record the sequence of tree ring widths. Spruce was a common building material and there is a wealth of houses supplying data. The data can be assumed to originate almost entirely from trees grown above 900 meters because trees were only very rarely transported uphill. 
 
-The chronology used for this project has been compiled from 234 individual measurements of buildings in the Bernese Oberland which are all located above 900 meters. Typically, the wooden structure of old buildings is sampled by boring the beams. The drilling core is then analyzed by microscoping, recording the sequence of tree ring widths. Spruce was a common building material and there is a wealth of houses supplying data. The data can be assumed to originate almost entirely from trees that grew above 900 meters since trees were rarely transported uphill. The data has been supplied by the archaeological service of the canton Berne [@dendroBern] through a personal contact at the dendrology laboratory in Sutz, BE who also detailed the process of acquiring the samples.
+We now give some definitions and show in a more rigorous manner how the mean and standard deviation are calculated from the raw dataset. Let be $R_t := \{r_{ti}, i=1,...N\}$ the set of ring width measurements $r$ for fixed year $t$. Then, the cardinality for a fixed year $t$, also denoted the *sample depth*, is defined as $n_t := |R_t| = \sum^N_{i=1} \mathds{1}_{(y_{ti} \neq \text{NA})}$. The average ring width of a fixed year $t$ is then $\bar{r_t} := \frac{1}{n_t}\sum^N_{i=1}r_{ti} \mathds{1}_{(r_i \neq \text{NA})}$, and the sample standard deviation ${sd}_t := \sqrt{\frac{1}{n_t-1}\sum^N_{i=1}(r_{it}-\bar{r_t})^2 \mathds{1}_{(y_i \neq \text{NA})}}$. Finally, the set of yearly mean tree ring widths of all the individual trees with data for a given year is $\bar{R}=\{\bar{r_t}, t=1,...,T\}$.
 
-The dataset $rwl$ comprises measurements of $N=234$ tree ring sequences originating from the Bernese Oberland. The individual sequences are dated (the most recent ring has a year associated to it), which allows to give the timespan from oldest tree (first ring measured) to most recent tree as 1332 to 2017. The length of the series is therefore $T=686$ years.
-
-Let $R_t = \{r_{ti}, i=1,...N\}$ the set of ring width measurements for fixed year $t, t \in [1332,2017]$.
-
-Let $n_t = |R_t| = \sum^N_{i=1} \mathds{1}_{(y_{ti} \neq \text{NA})}$, the cardinality for a fixed year $t$, also denoted the *sample depth*.
-
-Let $\bar{r_t} = \frac{1}{n_t}\sum^N_{i=1}r_{ti}*\mathds{1}_{(r_i \neq \text{NA})}$, the mean ring width for a fixed year $t$.
-
-Let ${sd}_t = \sqrt{\frac{1}{n_t-1}\sum^N_{i=1}(y_i-x_t)^2*\mathds{1}_{(y_i \neq \text{NA})}}$, the sample standard deviation for year $t$.
-
-Let $\bar{R}=\{\bar{r_t}, t=1,...,T\}$ the set of yearly mean tree ring widths of all the individual trees with data for a given year. The unit is `1/100 mm`.
+As recommended by the supplier we ignore data after 1800 due a the prevalence of young trees distorting average ring widths $\bar{r_t}$ in that time range (see Figure \ref{fig:originalseries}). Additionally, we discard data before 1400 because of a very small sample depth in the years before. The unit of the untransformed ring width is 1/100 mm is throughout the paper.
 
 ```{r originalseries, fig.cap="The timeseries of yearly mean tree ring widths. The grey overlay shows the sample depth for each year."}
 plot(chron(rwl_df),ylab="Mean ring width [1/100 mm]")
 ```
 
-The series of mean tree ring widths $\bar{R}$ is shown in figure \ref{fig:originalseries}, created with the package `dplR`. The grey overlay represents the sample depth $n_t$. From the plot, a correlation between $n_t$ and $\bar{r}_t$ could be assumed, however it was not significant at $\alpha=5\%$ when considered as an exogeneous variable for trend removal (see below). Spearman's correlation test however was significant at $\alpha=5\%$ with a p-value of $2.194e-06$ and estimated $\rho=`r cor.test(rwl_mean,rwl_depth,method="spearman",exact = F)$estimate`$ .
+The series of mean tree ring widths $\{\bar{r_t}\}$ is shown in Figure \ref{fig:originalseries}.^[The plot is created with the `dplR` package.] The gray overlay represents the sample depth $n_t$. From the plot, a correlation between sample depth $n_t$ and the average ring width $\bar{r_t}$ could be assumed, but no significant relationship is found, when we use the sample depth $n_t$ as an exogeous variable in a linear model. In contrast to that, the Spearman's correlation test howewver is significant at $\alpha=5\%$ with a p-value of $2.194e-06$ and estimated $\rho=`r cor.test(rwl_mean,rwl_depth,method="spearman",exact = F)$estimate`. Transforming the dendrochronologies with respect to the sample depth $n_t$ could be an intresting approach for a future analysis, but is not used here.
 
-```{r fitsampledepth, results='markup', size="footnotesize"}
+```{r fitsampledepth, results='markup', size="footnotesize", include=FALSE}
 summary(lm(rwl_mean~year+rwl_depth))$coef
 ```
 
 
-
-The supplier of the data recommended to ignore data after 1800 due to insufficient quality of data for these years, with a prevalence of young trees distorting $\bar{r_t}$ in that time range (see figure \ref{fig:originalseries}). Additionally, it was decided to discard data before 1400 because of a very small sample depth in the years before that. The analysis has therefore been conducted with the set $\bar{R^*}=\{\bar{r}_t: 1400 \leq t \leq 1800\}$.
