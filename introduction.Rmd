@@ -28,7 +28,7 @@ An additional method was deduced on a more intuitive approach. Having raw data a
 
 1. Scaling the means by dividing them by the standard deviation: $B_t = \bar{r}_t/sd_t$, $t=1,..., T$,
 2. Log tranform the scaled means $B_t$ to get $C_t = ln(B_t)$, 
-3. Finally, fit a linear model of the form: $X_t = \beta_0 + \beta_1 C_t$
+3. Finally, fit a linear model of the form $C_t = \beta_0 + \beta_1 t$ to obtain the residuals $X_t$
 
 We have not seen this method in literature. A drawback  is that it requires to estimate the standard deviation at times $t=1,...,T$, which is not possible if only data on the yearly mean tree ring width is at hand.
 
