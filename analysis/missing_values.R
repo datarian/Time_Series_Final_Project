@@ -739,6 +739,5 @@ modelComparisonImputationTable2 <- rbind(data.frame(Approach="Original. with sd 
 modelComparisonImputationTable <- rbind(modelComparisonImputationTable1, modelComparisonImputationTable2)
 colnames(modelComparisonImputationTable) <- c("Approach","AR(1)", "AR(2)", "ARMA(1,1)", "Linear Interpolation")
 
-modelComparisonImputationTable1[,2:5] <- apply(modelComparisonImputationTable1[,2:5],2,round,digits=4)
-modelComparisonImputationTable2[,2:5] <- apply(modelComparisonImputationTable2[,2:5],2,round,digits=4)
+modelComparisonImputationTable[,2:5] <- apply(modelComparisonImputationTable[,2:5],2,signif,digits=4)
 

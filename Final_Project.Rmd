@@ -63,7 +63,6 @@ library(egg)
 library(ggpubr)
 
 # Source plot defaults and the complete analysis:
-source("latex/plotDefaults.R")
 source("analysis/complete_analysis.R")
 ```
 

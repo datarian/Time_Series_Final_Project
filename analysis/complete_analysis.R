@@ -2,6 +2,9 @@
 
 rm(list=ls())
 
+# Set defaults for ggplot
+source("latex/plotDefaults.R")
+
 # Read raw data, build dataframes for later.
 source("analysis/prepare_individual_series.R")
 
