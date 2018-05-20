@@ -78,7 +78,7 @@ kable(modelComparisonImputationTable, booktabs=T,
     collapse_rows(columns=c(1),headers_to_remove=c(1), latex_hline = "custom", custom_latex_hline = 1)
 ```
 
-```{r imputationcomparison, fig.cap="Comparison of imputed values obtained through different methods."}
+```{r imputationcomparison, fig.cap="Comparison of imputed values obtained through different methods. Vertical lines represent location of missing values.", out.width="\\linewidth"}
 pplot_comparison
 ```
 

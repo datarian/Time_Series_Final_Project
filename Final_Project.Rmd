@@ -20,6 +20,7 @@ output:
 abstract: "A dendrochronology compiled using samples taken from wooden buildings in the Bernese Oberland is investigated using methods of time series analysis. A stationary series is obtained through a combination of scaling, log-transformation and linear trend removal. Several possible models are identified and their performance with respect to imputing missing data is investigated. We demonstrate that the transformed time series of tree ring width data is best discribed by an ARMA(1,1) model and that such a model is also superior to simple linear interpolation when used to impute missing values."
 ---
 
+
 ```{r setup, include=FALSE,cache.vars="rwl_df"}
 knitr::opts_chunk$set(error=TRUE,
                       warning=FALSE,

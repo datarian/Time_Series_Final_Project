@@ -655,13 +655,51 @@ data$Method <- factor(data$Method, labels=c("Own implementation", "imputeTS",
 data_NA_removed <- data[!is.na(data$Values),]
 tail(data_NA_removed)
 
-pplot_comparison <- ggplot(data, aes(y=Values, x=Time, group=Method))
-pplot_comparison <- pplot_comparison + geom_line(aes(col=Method), alpha = 1) +
+
+pplot_comparison <- ggplot(data, aes(y=Values, x=Year, group=Method)) +
+    geom_line(aes(col=Method), alpha = 1) +
+    geom_point(aes(col=Method),data=interpolated_points, alpha=0.7) +
     scale_color_manual(values=c("blue", "green", "purple", "red", "black")) +
     scale_linetype_manual(values=c("solid", "solid", "solid", "solid", "solid")) +
     theme(legend.position="bottom",
           plot.title = element_text(face="bold", hjust=0.5)) +
-    geom_vline(xintercept = t[impute_idx], col="grey") +
+    geom_vline(xintercept = t[impute_idx], col="grey",size=0.3) +
+    labs(y="Width [1/100mm]")
+
+
+library(dplyr)
+
+original_series <- data.frame(Year=1400:1800,Values=as.numeric(spruce_window),Method="True value")
+imputed_values <- data.frame(Values=c(own_implementation, imputeTS, lin_int, true_imputed),
+                   Year = rep(1400:1800, 4),
+                   Method = c(rep(1, length(spruce_window)), rep(2, length(spruce_window)),
+                              rep(3, length(spruce_window)), rep(4, length(spruce_window))))
+
+imputed_values$Method <- factor(imputed_values$Method, labels=c("Own implementation", "imputeTS",
+                                            "Linear interpolation", "True value"))
+interpolated_points <- imputed_values %>% filter(Year %in% t[impute_idx])
+
+pplot_comparison_2 <- ggplot(original_series, aes(y=Values, x=Year)) +
+    geom_vline(xintercept = t[impute_idx], col="grey",size=0.3) +
+    geom_line(aes(col=Method), alpha=0.8) +
+    geom_line(aes(x=Year,y=Values,col=Method),data=imputed_values) +
+    geom_point(aes(col=Method),data=interpolated_points, alpha=0.9) +
+    scale_color_manual(values=c(pal[2:4],"black")) +
+    scale_linetype_manual(values=c("solid", "solid", "solid", "solid", "solid")) +
+    theme(legend.position="bottom",
+          plot.title = element_text(face="bold", hjust=0.5)) +
+    labs(y="Width [1/100mm]")
+
+pplot_comparison_2_snapshot <- ggplot(original_series, aes(y=Values, x=Year)) +
+    geom_vline(xintercept = t[impute_idx], col="grey",size=0.3) +
+    geom_line(aes(col=Method), alpha=0.8) +
+    geom_line(aes(x=Year,y=Values,col=Method),data=imputed_values) +
+    geom_point(aes(col=Method),data=interpolated_points, alpha=0.5) +
+    scale_color_manual(values=c(pal[2:4],"black")) +
+    scale_linetype_manual(values=c("solid", "solid", "solid", "solid", "solid")) +
+    scale_x_continuous(limits = c(1550,1600)) +
+    theme(legend.position="bottom",
+          plot.title = element_text(face="bold", hjust=0.5)) +
     labs(y="Width [1/100mm]")
 
 # Summary
