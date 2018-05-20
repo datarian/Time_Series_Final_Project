@@ -357,4 +357,4 @@ stationaritylog_order1_plot <- ggplot(data_log_order1_varstab,aes(x=Time,y=y)) +
     ylab("Scaled, log tranformed values [-]")
 
 stationarity_qq_plot <- ggplot(data_log_order1_varstab, aes(sample = y)) +
-    geom_qq() + stat_qq_line()
+    geom_qq(alpha=0.5) + stat_qq_line()
