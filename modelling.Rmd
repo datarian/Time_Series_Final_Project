@@ -79,7 +79,7 @@ kable(modelComparisonImputationTable, booktabs=T,
 ```
 
 ```{r imputationcomparison, fig.cap="Comparison of imputed values obtained through different methods. Vertical lines represent location of missing values.", out.width="\\linewidth"}
-pplot_comparison
+pplot_comparison_2
 ```
 
 The `na.kalman` method of the `imputeTS` package, for which ARMA(1,1) processes are assumed for the transformed times series and for the standard deviation by automatic model selection using `auto.arima` from the `forecast` package, leads to similar results. Comparing the values of our implementation versus `na.kalman` gives an MSE of $\text{8.8}\cdot \text{10}^\text{5}$ for the transformed series and an MSE of $2.7$ in case of the standard deviation. However, in an overall comparison the `na.kalman` performs better than our implementation by achieving an MSE of $256.1$ when assuming an ARMA(1,1) for the transformed time series and the standard deviation, and equally when the standard deviation is linearly interpolated (own implementation: 274.2 vs. `na.kalman`: 275.7). The differences may be explained by our implementation of the ARMA(1,1), where we have to add some noise to the covariance matrix of the state equation in order to be able to estimate the model with the `dlm` package. 

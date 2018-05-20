@@ -658,7 +658,6 @@ tail(data_NA_removed)
 
 pplot_comparison <- ggplot(data, aes(y=Values, x=Year, group=Method)) +
     geom_line(aes(col=Method), alpha = 1) +
-    geom_point(aes(col=Method),data=interpolated_points, alpha=0.7) +
     scale_color_manual(values=c("blue", "green", "purple", "red", "black")) +
     scale_linetype_manual(values=c("solid", "solid", "solid", "solid", "solid")) +
     theme(legend.position="bottom",
@@ -677,6 +676,7 @@ imputed_values <- data.frame(Values=c(own_implementation, imputeTS, lin_int, tru
 
 imputed_values$Method <- factor(imputed_values$Method, labels=c("Own implementation", "imputeTS",
                                             "Linear interpolation", "True value"))
+
 interpolated_points <- imputed_values %>% filter(Year %in% t[impute_idx])
 
 pplot_comparison_2 <- ggplot(original_series, aes(y=Values, x=Year)) +
@@ -738,4 +738,7 @@ modelComparisonImputationTable2 <- rbind(data.frame(Approach="Original. with sd 
 
 modelComparisonImputationTable <- rbind(modelComparisonImputationTable1, modelComparisonImputationTable2)
 colnames(modelComparisonImputationTable) <- c("Approach","AR(1)", "AR(2)", "ARMA(1,1)", "Linear Interpolation")
+
+modelComparisonImputationTable1[,2:5] <- apply(modelComparisonImputationTable1[,2:5],2,round,digits=4)
+modelComparisonImputationTable2[,2:5] <- apply(modelComparisonImputationTable2[,2:5],2,round,digits=4)
 
