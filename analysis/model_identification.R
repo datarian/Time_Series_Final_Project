@@ -96,8 +96,8 @@ acf_comparison_df$model <- factor(acf_comparison_df$model,
 
 acf_comparison_plot <- ggplot(acf_comparison_df,aes(x=lag,y=acf,fill=model)) +
     geom_col(position="dodge", width = 0.7) +
-    geom_hline(yintercept=c(0),size=0.5) +
-    geom_hline(yintercept=c(-1.96/sqrt(400),1.96/sqrt(400)),colour="darkgrey",size=0.5) +
+    geom_hline(yintercept=0,size=0.3) +
+    geom_hline(yintercept=c(-1.96/sqrt(400),1.96/sqrt(400)),colour="darkgrey",size=0.3) +
     ylab("ACF")
 
 # Combine standardized residuals of all 3 models for display *******************
@@ -107,8 +107,8 @@ residuals_df$residuals <- as.numeric(levels(residuals_df$residuals)[residuals_df
 residuals_df$model <- factor(residuals_df$model, levels = c("AR(1)","AR(2)","ARMA(1,1)"))
 
 residuals_plot <- ggplot(residuals_df, aes(x=year,y=residuals,colour=model)) +
-    geom_hline(yintercept=c(0),size=0.5) +
-    geom_line()
+    geom_hline(yintercept=0,size=0.3) +
+    geom_line(size=0.3)
 
 # Combine Box.test results of all three models for display *********************
 
@@ -139,5 +139,5 @@ boxtest_df$model <- factor(boxtest_df$model,
 
 boxtest_plot <- ggplot(boxtest_df, aes(x=lag,y=pvalue,colour=model)) +
     geom_point() +
-    geom_hline(yintercept=0.05) +
+    geom_hline(yintercept=0.05, colour="darkgrey",size=0.3) +
     ylab("p value")

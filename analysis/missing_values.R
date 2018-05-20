@@ -680,9 +680,9 @@ imputed_values$Method <- factor(imputed_values$Method, labels=c("Own implementat
 interpolated_points <- imputed_values %>% filter(Year %in% t[impute_idx])
 
 pplot_comparison_2 <- ggplot(original_series, aes(y=Values, x=Year)) +
-    geom_vline(xintercept = t[impute_idx], col="grey",size=0.3) +
-    geom_line(aes(col=Method), alpha=0.8) +
-    geom_line(aes(x=Year,y=Values,col=Method),data=imputed_values) +
+    geom_vline(xintercept = t[impute_idx], col="lightgrey",size=0.2) +
+    geom_line(aes(col=Method), alpha=0.8,size=0.3) +
+    geom_line(aes(x=Year,y=Values,col=Method),data=imputed_values,size=0.3) +
     geom_point(aes(col=Method),data=interpolated_points, alpha=0.9) +
     scale_color_manual(values=c(pal[2:4],"black")) +
     scale_linetype_manual(values=c("solid", "solid", "solid", "solid", "solid")) +
@@ -691,9 +691,9 @@ pplot_comparison_2 <- ggplot(original_series, aes(y=Values, x=Year)) +
     labs(y="Width [1/100mm]")
 
 pplot_comparison_2_snapshot <- ggplot(original_series, aes(y=Values, x=Year)) +
-    geom_vline(xintercept = t[impute_idx], col="grey",size=0.3) +
-    geom_line(aes(col=Method), alpha=0.8) +
-    geom_line(aes(x=Year,y=Values,col=Method),data=imputed_values) +
+    geom_vline(xintercept = t[impute_idx], col="grey",size=0.2) +
+    geom_line(aes(col=Method), alpha=0.8,size=0.3) +
+    geom_line(aes(x=Year,y=Values,col=Method),data=imputed_values,size=0.3)+
     geom_point(aes(col=Method),data=interpolated_points, alpha=0.5) +
     scale_color_manual(values=c(pal[2:4],"black")) +
     scale_linetype_manual(values=c("solid", "solid", "solid", "solid", "solid")) +

@@ -338,7 +338,7 @@ data_log_order1_varstab$y <- as.numeric(levels(data_log_order1_varstab$y)[data_l
 
 # woollons
 stationarity_woollons_plot <- ggplot(data_woollons_sd_stab,aes(x=Time,y=y)) +
-    geom_line(size=0.5) +
+    geom_line(size=0.3) +
     ylab("")
 
 # power transformation & box-cox
@@ -347,14 +347,14 @@ data_powerbox <- rbind(data_powertrans_centered,
 data_powerbox$Time <- as.numeric(levels(data_powerbox$Time)[data_powerbox$Time])
 data_powerbox$y <- as.numeric(levels(data_powerbox$y)[data_powerbox$y])
 stationarity_powerbox_plot <- ggplot(data_powerbox,aes(x=Time,y=y,colour=method)) +
-    geom_line(size=0.5) +
+    geom_line(size=0.3) +
     ylab("") +
     theme(legend.justification=c(1,1), legend.position=c(1,1))
 
 stationaritylog_order1_plot <- ggplot(data_log_order1_varstab,aes(x=Time,y=y)) +
-    geom_hline(yintercept = 0,size=0.5) +
-    geom_line(size=0.5) +
+    geom_hline(yintercept = 0,size=0.3) +
+    geom_line(size=0.3) +
     ylab("Scaled, log tranformed values [-]")
 
 stationarity_qq_plot <- ggplot(data_log_order1_varstab, aes(sample = y)) +
-    geom_qq(alpha=0.5) + stat_qq_line()
+    geom_qq(alpha=0.5) + stat_qq_line(size=0.3)

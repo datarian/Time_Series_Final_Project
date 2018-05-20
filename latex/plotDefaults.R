@@ -9,7 +9,7 @@ ggplot2::theme_update(
     panel.grid.minor = ggplot2::element_blank(),
     panel.border = ggplot2::element_rect(colour = "black", size=0.5),
     axis.line = ggplot2::element_line(colour = "black",size= 0.5),
-    line = ggplot2::element_line(size=0.5),
+    line = ggplot2::element_line(size=0.3),
     axis.ticks = ggplot2::element_line(colour = "black"),
     axis.title.x = ggplot2::element_text(face="bold", margin = ggplot2::margin(10,0,0,0)),
     axis.title.y = ggplot2::element_text(face="bold", margin = ggplot2::margin(0,10,0,0)),

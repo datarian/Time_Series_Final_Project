@@ -3,7 +3,7 @@ The dataset used for the analysis is supplied from the the archaeological servic
 
 We now give some definitions and show in a more rigorous manner how the mean and standard deviation are calculated from the raw dataset. Let be $R_t := \{r_{ti}, i=1,...N\}$ the set of ring width measurements $r$ for fixed year $t$. Then, the cardinality for a fixed year $t$, also denoted the *sample depth*, is defined as $n_t := |R_t| = \sum^N_{i=1} \mathds{1}_{(y_{ti} \neq \text{NA})}$. The average ring width of a fixed year $t$ is then $\bar{r_t} := \frac{1}{n_t}\sum^N_{i=1}r_{ti} \mathds{1}_{(r_i \neq \text{NA})}$, and the sample standard deviation ${sd}_t := \sqrt{\frac{1}{n_t-1}\sum^N_{i=1}(r_{it}-\bar{r_t})^2 \mathds{1}_{(y_i \neq \text{NA})}}$. Finally, the set of yearly mean tree ring widths of all the individual trees with data for a given year is $\bar{R}=\{\bar{r_t}, t=1,...,T\}$.
 
-```{r originalseries, fig.cap="The timeseries of yearly mean tree ring widths. The grey overlay shows the sample depth for each year."}
+```{r originalseries, fig.cap="The timeseries of yearly mean tree ring widths. The grey overlay shows the sample depth for each year.", out.width="\\linewidth"}
 plot(chron(rwl_df),ylab="Mean ring width [1/100 mm]")
 ```
 
