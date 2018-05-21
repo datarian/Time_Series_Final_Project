@@ -1,22 +1,23 @@
-###############################################################################
-# Model identification
 
-# order1_model is the stationary series created in make_series_stationary.R
+# Finding candidate time series models and assessing them.
 
-Xt <- order1_model$residuals
-#Xt <- order1_exog_model$residuals
+
+
+Xt <- order1_model$residuals # the stationary series created in make_series_stationary.R
 Xt.bar <- mean(Xt)
-Box.test(x=Xt,lag=20,type="Ljung-Box")
-
 
 # Find best model automatically:
 Xt.autofit <- autofit(x=Xt,p=1:3,q=0:3) # ARMA(1,1) was found.
 
 
 #*******************************************************************************
-# Fit 3 models: ARMA(1,1), AR(1), AR(2) -> literature hints, ACF/PACF interpretaion
-# and extract parameters for comparison
+# Fit 3 models: ARMA(1,1), AR(1), AR(2) and extract parameters for comparison
+# Decision basis: literature hints, ACF/PACF interpretaion
 
+
+# Extract parameters and model residuals
+
+# Arma(1,1)
 Xt.arma11 <- arima(x=Xt,order=c(1,0,1),include.mean = F)
 arma11.phi <- Xt.arma11$model$phi
 arma11.phi.causal <- abs( polyroot(c(1,-arma11.phi)))
@@ -24,14 +25,14 @@ arma11.theta <- Xt.arma11$model$theta
 arma11.sigma2 <- Xt.arma11$sigma2
 arma11_resids <- cbind(year=t,residuals=Xt.arma11$residuals/sd(Xt.arma11$residuals),model=rep("ARMA(1,1)",times=length(t)))
 
-
+# AR(1)
 Xt.ar1 <- arima(x=Xt,order=c(1,0,0),include.mean = F)
 ar1.phi <- Xt.ar1$model$phi
 ar1.phi.causal <- abs( polyroot(c(1,-ar1.phi)))
 ar1.sigma2 <- Xt.ar1$sigma2
 ar1_resids <- cbind(year=t,residuals=Xt.ar1$residuals/sd(Xt.ar1$residuals),model=rep("AR(1)",times=length(t)))
 
-
+# AR(2)
 Xt.ar2 <- arima(x=Xt,order=c(2,0,0),include.mean = F)
 ar2.phi <- Xt.ar2$model$phi
 ar2.phi.causal <- abs( polyroot(c(1,-ar2.phi)))
@@ -40,12 +41,14 @@ ar2_resids <- cbind(year=t,residuals=Xt.ar2$residuals/sd(Xt.ar2$residuals),rep("
 
 
 #*******************************************************************************
+# Prepare data frames for report tables
+
+
 # Compare AIC's of the 3 models
 model_aic_compared <- data.frame(Model=c("ARMA(1,1)","AR(1)","AR(2)"),
                                  AIC=c(Xt.arma11$aic,Xt.ar1$aic,Xt.ar2$aic))
 
 
-#*******************************************************************************
 # Build a comparison dataframe for parameters
 paramnames <- c("$\\phi$","$\\theta$","$\\sigma^2_{ARMA(1,1)}$",
                 "$\\phi$","$\\sigma^2_{AR(1)}$",
@@ -69,9 +72,9 @@ colnames(modelComparisonTable) <- c("Model","Parameter name",
 
 
 #*******************************************************************************
-# Manually build up the tsdiag() plots for all three models combined:
+# Manually build up the tsdiag() plots for all three models combined
 
-# Combine ACF of all three models for display **********************************
+# ACF
 
 acf_arma11 <- acf(Xt.arma11$residuals, type="correlation",plot=F)
 acf_arma11 <- data.frame(lag=0:26,
@@ -100,7 +103,9 @@ acf_comparison_plot <- ggplot(acf_comparison_df,aes(x=lag,y=acf,fill=model)) +
     geom_hline(yintercept=c(-1.96/sqrt(400),1.96/sqrt(400)),colour="darkgrey",size=0.3) +
     ylab("ACF")
 
-# Combine standardized residuals of all 3 models for display *******************
+
+# Standardized residuals (no need to manually standardize, they are already scaled)
+
 residuals_df <- as.data.frame(rbind(arma11_resids,ar1_resids,ar2_resids))
 residuals_df$year <- as.numeric(levels(residuals_df$year)[residuals_df$year])
 residuals_df$residuals <- as.numeric(levels(residuals_df$residuals)[residuals_df$residuals])
@@ -110,7 +115,8 @@ residuals_plot <- ggplot(residuals_df, aes(x=year,y=residuals,colour=model)) +
     geom_hline(yintercept=0,size=0.3) +
     geom_line(size=0.3)
 
-# Combine Box.test results of all three models for display *********************
+
+# Ljung-Box test
 
 boxtest_df <- data.frame()
 
@@ -124,11 +130,11 @@ for(l in 1:10){
     }
     if(l>2){
         p_box_arma11 <- Box.test(Xt.arma11$residuals,
-                               lag=l,type="Ljung-Box",fitdf = 2)$p.value
+                                 lag=l,type="Ljung-Box",fitdf = 2)$p.value
         box_arma11 <- data.frame(lag=l, pvalue=p_box_arma11, model="ARMA(1,1)")
 
         p_box_ar2 <- Box.test(Xt.ar2$residuals,
-                            lag=l,type="Ljung-Box",fitdf = 2)$p.value
+                              lag=l,type="Ljung-Box",fitdf = 2)$p.value
         box_ar2 <- data.frame(lag=l, pvalue=p_box_ar2, model="AR(2)")
         boxtest_df <- rbind(boxtest_df, box_arma11, box_ar2)
     }
