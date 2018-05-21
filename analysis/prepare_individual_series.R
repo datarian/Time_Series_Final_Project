@@ -1,9 +1,5 @@
-#### Individual series
 # This script parses the raw data file 900+.txt and builds a dataframe in 'rwl'
 # format, a standard for dendrochronological data.
-# It also computes the mean value chronology and does some preliminary analysis
-# of the data for process identification.
-
 
 library(readtext)
 library(stringr)
@@ -18,7 +14,7 @@ pattern <- "\\sNr\\. ([0-9]*)\\.0 Dat: ([0-9]{3,4}).*\\n.*\\n.*\\n{1,2}((?:[ ]{1
 parsed <- str_match_all(file_contents,pattern)
 rm(file_contents) # Free up memory
 
-# Extract the sample numbers and their corresponding dated year
+# Extract the sample identification numbers and their corresponding dated year
 chronology <- as.data.frame(parsed[[1]][,-1],stringsAsFactors = F)
 rm(parsed) # Free up memory
 
@@ -39,14 +35,14 @@ for (i in 1:nrow(chronology)) {
 
 # We now have three objects to construct the aggregated chronology dataframe:
 # chron_numbers: the sample numbers (identifier)
-# chron_years: the dated years of the samples
+# chron_years: the dated year of the samples (growth year of youngest ring measured)
 # chron_rings: The sequence of yearly ring widths of the samples
 
 # construct the sequence of years spanning the data. For the oldest year, we need
 # the minimum of dated year - age of tree
 oldest <- +Inf # initialize with a ridiculously high number
 for(i in 1:length(chron_years)){
-    currentsample <- chron_years[i]-(length(chron_rings[[i]])-1)
+    currentsample <- chron_years[i] - (length(chron_rings[[i]])-1)
     oldest <- ifelse(currentsample < oldest, currentsample, oldest)
 }
 newest <- max(chron_years)
@@ -68,7 +64,7 @@ for(i in 1:length(chron_numbers)){
     if(datedyear > oldest){
         fillbefore <- rep(NA,times=(datedyear-(length(chron_rings[[i]])-1)-oldest))
     }
-    if(datedyear<newest){
+    if(datedyear < newest){
         fillafter <- rep(NA,times=newest-datedyear)
     }
     rings <- chron_rings[[i]]
@@ -77,4 +73,5 @@ for(i in 1:length(chron_numbers)){
     rwl_df <- cbind(rwl_df,series)
 }
 
+# Save to an Rds file for later use
 saveRDS(rwl_df,file="data/rwl_900+.Rds")

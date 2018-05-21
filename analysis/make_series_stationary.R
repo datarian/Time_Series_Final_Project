@@ -7,8 +7,12 @@ library(dlm)
 library(itsmr)
 library(MASS)
 
+
+#*******************************************************************************
 #*******************************************************************************
 # Preparing the time series
+#*******************************************************************************
+#*******************************************************************************
 
 raw_rwl <- readRDS("data/rwl_900+.Rds")
 
@@ -29,6 +33,8 @@ year <- seq(start(rwl_ts)[1],end(rwl_ts)[1])
 seriesDepth <- as.data.frame(cbind(year,rwl_depth))
 seriesMean <- as.data.frame(cbind(year,rwl_mean))
 
+# Exploratory plots
+
 seriesDepthPlot <- ggplot(seriesDepth, aes(x=year,y=rwl_depth)) +
     geom_line() +
     ylab("Sample depth [#]") +
@@ -41,7 +47,7 @@ seriesMeanPlot <- ggplot(seriesMean, aes(x=year,y=rwl_mean)) +
     xlab("Time") +
     theme(aspect.ratio = 0.618)
 
-# Showing off heteroskedasticity
+# Showing heteroskedasticity
 heterosk <- lm(seriesMean$rwl_mean~seriesMean$year)
 seriesHeterosk <- as.data.frame(cbind(year,heterosk$residuals))
 seriesHeteroskedasticityPlot <- ggplot(seriesHeterosk, aes(x=year,y=V2)) +
@@ -50,36 +56,44 @@ seriesHeteroskedasticityPlot <- ggplot(seriesHeterosk, aes(x=year,y=V2)) +
     xlab("Time") +
     theme(aspect.ratio = 0.618)
 
+#*******************************************************************************
+# Restrict series to 1400 - 1800
 spruce_window <- window(rwl_ts,start=1400, end=1800)
 rwl_depth_window <- window(rwl_depth_ts,start=1400, end=1800)
 rwl_mean_window <- window(rwl_mean_ts,start=1400, end=1800)
 rwl_sd_window <- window(rwl_sd_ts,start=1400, end=1800)
 t <- 1400:1800
 
-data_to_plot <- as.data.frame(cbind(Time=t, ringwidth=spruce_window,model=rep("Observed",times=length(t))))
-
 # Literature
 # New Zealand Journal of Ecology (1990) 13: 9-15 (https://newzealandecology.org/nzje/1872)
 
+#*******************************************************************************
+#*******************************************************************************
+# Best approach: Scaling, log-transform, linear trend removal
+#*******************************************************************************
+#*******************************************************************************
 
-# Approaches 1 + 2 are derived from literature
-# Approaches 3 + 4 are more "intuitive".
-
-# Approach 4 is the only one which displays exponential decrease of the ACF.
-
-
-# We don't know which approach would be the way to go forward. -> Matthieu?
-
-
-################################################################################
-################################################################################
-# Making series stationary: First approach
-################################################################################
-################################################################################
+spruce_window_stab <- spruce_window/rwl_sd_window
+spruce_window_log <- log(spruce_window_stab)
 
 
-# Methods to estimate trend
-################################################################################
+order1_model <- lm(spruce_window_log ~ t)
+summary(order1_model)
+
+order1_exog_model <- lm(log(spruce_window_stab)~t+rwl_depth_window)
+order1_exog_model
+
+data_log_order1_varstab <- as.data.frame(cbind(Time=t, y=order1_model$residuals,model=rep("Log trans., order 1",times=length(t))))
+data_log_order1_varstab$Time <- as.numeric(levels(data_log_order1_varstab$Time)[data_log_order1_varstab$Time])
+data_log_order1_varstab$y <- as.numeric(levels(data_log_order1_varstab$y)[data_log_order1_varstab$y])
+
+
+
+#*******************************************************************************
+#*******************************************************************************
+# Woollons approach: Discarded
+#*******************************************************************************
+#*******************************************************************************
 
 
 # Method 1: Proposed in Woollons and Norton
@@ -116,7 +130,7 @@ pplot + geom_line(aes(y=y1), color="blue") +
 
 
 # Method 2: Polynomial of order 2
-##------------------------------------------------------------------------------
+#*******************************************************************************
 t2 <- t^2
 d2 <- cbind(d1,t2)
 d2 <- cbind(spruce_window, d2)
@@ -151,7 +165,7 @@ pplot + geom_line(aes(y=Values, group=Est_Mean_Method, color=factor(Est_Mean_Met
 
 
 # Variance Stabilisation
-################################################################################
+#*******************************************************************************
 
 # Residual time series
 #-------------------------------------------------------------------------------
@@ -227,11 +241,12 @@ data_woollons_sd_stab$Time <- as.numeric(levels(data_woollons_sd_stab$Time)[data
 data_woollons_sd_stab$y <- as.numeric(levels(data_woollons_sd_stab$y)[data_woollons_sd_stab$y])
 
 
-################################################################################
-################################################################################
-# Second Approach: Power transformation of the residuals (by hand)
-################################################################################
-################################################################################
+
+#*******************************************************************************
+#*******************************************************************************
+# Approach: Power transformation of the residuals (by hand) -> DISCARDED
+#*******************************************************************************
+#*******************************************************************************
 
 eps <- 1/10000 # To prevent log from getting -inf
 R <- spruce_window
@@ -292,11 +307,13 @@ pplot + geom_line(aes(y=Values, group=y,
 ggAcf(R_transformed_centered, main="ACF plot after a power transformation and subtracting a linear trend")
 ggPacf(R_transformed_centered, main="PACF plot after a power transformation and subtracting a linear trend")
 
-################################################################################
-################################################################################
-# Third approach: Box-Cox transformation
-################################################################################
-################################################################################
+
+
+#*******************************************************************************
+#*******************************************************************************
+# Approach: Box-Cox transformation -> DISCARDED
+#*******************************************************************************
+#*******************************************************************************
 
 # Box-Cox-Transform:
 lambdas <- boxcox(spruce_window~t)
@@ -311,30 +328,12 @@ acf(spruce_window_boxcox)
 pacf(spruce_window_boxcox)
 
 
-################################################################################
-################################################################################
-# Fourth approach: Log transform, polynomials
-################################################################################
-################################################################################
-
-spruce_window_stab <- spruce_window/rwl_sd_window
-spruce_window_log <- log(spruce_window_stab)
-
-
-order1_model <- lm(spruce_window_log ~ t)
-summary(order1_model)
-
-order1_exog_model <- lm(log(spruce_window_stab)~t+rwl_depth_window)
-order1_exog_model
-
-data_log_order1_varstab <- as.data.frame(cbind(Time=t, y=order1_model$residuals,model=rep("Log trans., order 1",times=length(t))))
-data_log_order1_varstab$Time <- as.numeric(levels(data_log_order1_varstab$Time)[data_log_order1_varstab$Time])
-data_log_order1_varstab$y <- as.numeric(levels(data_log_order1_varstab$y)[data_log_order1_varstab$y])
-
-
 
 #*******************************************************************************
-# Overview plots
+#*******************************************************************************
+# Overview plots -> report
+#*******************************************************************************
+#*******************************************************************************
 
 # woollons
 stationarity_woollons_plot <- ggplot(data_woollons_sd_stab,aes(x=Time,y=y)) +
