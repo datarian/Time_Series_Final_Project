@@ -173,6 +173,7 @@ pacf(rwl_sd_window_centered) # => AR(2)
 # ------------------------------------------------------------------------------
 # Randomly chosen indices
 set.seed(123)
+
 impute_idx <- sample(1:9, 40, replace=T) + seq(0, 390, by=10)
 
 # Matrices to store the imputed values and whether the optimization has converged.
@@ -739,5 +740,5 @@ modelComparisonImputationTable2 <- rbind(data.frame(Approach="Original with sd a
 modelComparisonImputationTable <- rbind(modelComparisonImputationTable1, modelComparisonImputationTable2)
 colnames(modelComparisonImputationTable) <- c("Approach","AR(1)", "AR(2)", "ARMA(1,1)", "Linear Interpolation")
 
-modelComparisonImputationTable[,2:5] <- apply(modelComparisonImputationTable[,2:5],2,signif,digits=4)
+#modelComparisonImputationTable[,2:5] <- apply(modelComparisonImputationTable[,2:5],2,signif,digits=4)
 

@@ -74,10 +74,12 @@ The missing values are restricted to  be spread equally over the time series by 
 Assuming an ARMA(1,1) process for the transformed tree ring width series does not outperform the case where we linearly interpolate the same series. Not surprisingly, the best results are obtained when the standard deviation is known. However, simple linear interpolation on the original time series performs poorly compared to the other approaches with an MSE of 302.4. The results of the imputation are plotted in Figure \ref{fig:imputationcomparison}.
 
 ```{r modelcompimp}
+
 kable(modelComparisonImputationTable, booktabs=T,
       caption="MSE results of the simulation study.",
       escape=FALSE,
-      row.names = FALSE) %>%
+      row.names = FALSE,
+      format.args = c(digits = 4, big.mark = "'")) %>%
     kable_styling(latex_options = c("hold_position"), position = "center") %>%
     column_spec(1,bold=T)%>%
     collapse_rows(columns=c(1),headers_to_remove=c(1), latex_hline = "custom", custom_latex_hline = 1)

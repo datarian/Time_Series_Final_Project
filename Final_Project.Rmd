@@ -40,7 +40,7 @@ knitr::opts_knit$set(eval.after='fig.cap',
 # Format numbers to two digits
 inline_hook <- function(x) {
   if (is.numeric(x)) {
-    format(x, digits = 2, big.mark = "'")
+    format(x, digits = 4, big.mark = "'",drop0trailing = T)
   } else {
       x
   }
@@ -79,3 +79,8 @@ source("analysis/complete_analysis.R")
 ```
 
 # References
+
+<div id="refs"></div>
+
+```{r child="appendix.Rmd"}
+```

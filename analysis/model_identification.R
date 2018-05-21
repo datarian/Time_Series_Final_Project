@@ -56,11 +56,11 @@ paramnames <- c("$\\phi$","$\\theta$","$\\sigma^2_{ARMA(1,1)}$",
 
 parameters <- round(c(arma11.phi,arma11.theta,arma11.sigma2,
                       ar1.phi,ar1.sigma2,
-                      ar2.phi,ar2.sigma2),digits=3)
+                      ar2.phi,ar2.sigma2),digits=4)
 
-se <- c(round(sqrt(diag(Xt.arma11$var.coef)),digits=3),"-",
-        round(sqrt(diag(Xt.ar1$var.coef)),digits=3),"-",
-        round(sqrt(diag(Xt.ar2$var.coef)),digits=3),"-")
+se <- c(round(sqrt(diag(Xt.arma11$var.coef)),digits=4),"-",
+        round(sqrt(diag(Xt.ar1$var.coef)),digits=4),"-",
+        round(sqrt(diag(Xt.ar2$var.coef)),digits=4),"-")
 
 modelnames <- c(rep("ARMA(1,1)",times=3),
                 rep("AR(1)",times=2),
