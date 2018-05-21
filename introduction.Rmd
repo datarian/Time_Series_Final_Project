@@ -3,7 +3,7 @@
 # Introduction {#introduction}
 Dendrochronology, i.e. the method to date tree rings, is used in several fields of science. One relevant application of the method is in archeology where it is used to date (wooden) artifacts. In climate science, dated tree ring widths helps to learn more about the climate of the past. Tree ring chronologies also helps to backdate the radiocarbon concentration, which is used in radiocarbon calibration -- another method for dating artifacts.
 
-Usually, time series in dendrochnology span several hundred years. Such long series are constructed by merging and overlaying shorter lasting time series from individual trees. By taking the mean of yearly ring widths, a single time series is built. Chronologies are generally constructed for defined geographical regions as the environment (i.e the local climate, soil properties and terrain) has substantial impact on the growth of trees [@baillie2012slice].  
+Usually, time series in dendrochnology span several hundred to thousands of years. Such long series are constructed by merging and overlaying shorter lasting time series from individual trees. By taking the mean of yearly ring widths, a single time series is built. Chronologies are generally constructed for defined geographical regions as the environment (i.e the local climate, soil properties and terrain) has substantial impact on the growth of trees [@baillie2012slice].  
 
 From the perspective of statistics, tree ring data are of interest because they define a time series. According to @woollons1990time and @FOX2001261 AR(1) and ARMA(1,1) are popular choices for the time series process after having removed the trend. AR(2) is seen as an appropriate choice as well [see e.g. @dplR]. 
 
